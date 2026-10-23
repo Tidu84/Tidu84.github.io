@@ -1654,43 +1654,208 @@ export default function App() {
           KHUNG DIỄN ĐÀN CHÍNH (#ipbwrapper - BỐ CỤC CHUẨN FORUMVI)
       ======================================================== */}
       <div className="max-w-[1080px] w-full mx-auto px-2 sm:px-4 py-3 flex-1 flex flex-col space-y-3">
-        {/* LOGO STRIP CHÍNH THỨC CỦA HỌC POKER */}
-        <div className="bg-[#140c06]/95 border border-[#3d2712] rounded-xl p-3 sm:p-4 text-center shadow-2xl relative backdrop-blur-sm">
-          <a
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              handleCloseThread();
-            }}
-            className="inline-block hover:opacity-95 transition-opacity"
-            title="Chúng tôi chơi Poker - hocpoker.forumvi.com"
-          >
-            {renderCurrentLogo()}
-          </a>
-          <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#e6caa0] mt-2 font-serif italic">
-            Chia sẻ kiến thức liên quan tới Poker • hocpoker.forumvi.com
-          </p>
+        {/* KHU_VỰC_HEADER_BANNER CHÍNH THỨC */}
+        <div className="bg-[#080604] border border-[#4a3216] rounded-xl px-4 py-3.5 sm:px-6 sm:py-4 shadow-2xl relative overflow-hidden">
+          {/* Dòng tiêu đề phía trên (Không có đuôi tên miền) */}
+          <div className="text-center mb-3 pb-2 border-b border-[#3a2610]/80">
+            <h1 className="text-xs sm:text-sm md:text-base font-black tracking-[0.18em] text-[#ffd875] uppercase drop-shadow-[0_2px_6px_rgba(255,216,117,0.35)]">
+              CHIA SẺ KIẾN THỨC LIÊN QUAN TỚI POKER
+            </h1>
+          </div>
 
-          <div className="absolute top-3 right-3 flex items-center space-x-2 text-[11px]">
-            {/* Nút Đổi Mẫu Logo Thiết Kế Lại */}
-            <button
-              onClick={() => setShowLogoModal(true)}
-              className="px-2.5 py-1 rounded bg-[#2b1809] hover:bg-[#3d220c] border border-[#b8933b] text-[#f5d77f] transition-all flex items-center gap-1.5 shadow font-bold cursor-pointer"
-              title="Xem và chọn các phương án logo đã được thiết kế lại"
-            >
-              <Palette className="w-3.5 h-3.5 text-amber-400" />
-              <span>Đổi Mẫu Logo</span>
-            </button>
-
+          {/* Nội dung chính của Banner: Bên trái là Logo gốc không khung hộp, Bên phải là 3 Huy hiệu phân khu nối bằng đường mạch ánh sáng vàng kim */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-6">
+            {/* 1. Logo gốc: bàn tay đeo găng đen kẹp lá bài Nhép cùng chữ "Chơi Poker" vàng kim (Không thêm khung hộp) */}
             <a
-              href="https://hocpoker.forumvi.com/"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:flex px-2.5 py-1 rounded bg-[#1f1209] hover:bg-[#2e1c0e] border border-[#5c3717] text-[#e0c48e] transition-colors items-center gap-1 shadow"
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCloseThread();
+              }}
+              className="shrink-0 hover:opacity-95 transition-opacity cursor-pointer"
+              title="Chơi Poker - Chia sẻ kiến thức liên quan tới Poker"
             >
-              <span>Diễn Đàn Gốc</span>
-              <ExternalLink className="w-3 h-3" />
+              <img
+                src="/assets/forum/logo_variant1_gold.jpg"
+                alt="Chơi Poker"
+                className="h-20 sm:h-24 md:h-28 w-auto object-contain select-none"
+              />
             </a>
+
+            {/* Đường mạch ánh sáng vàng kim nối từ Logo sang hệ thống 3 Huy hiệu phân khu (hiển thị trên màn hình lớn) */}
+            <div className="hidden xl:flex items-center flex-1 min-w-[24px] max-w-[64px]">
+              <div className="w-2 h-2 rounded-full bg-[#ffd875] shadow-[0_0_8px_#ffd875]" />
+              <div className="flex-1 h-[2px] bg-gradient-to-r from-[#ffd875] via-[#ffe8a3] to-[#ffd875] shadow-[0_0_10px_#ffd875]" />
+              <div className="w-2 h-2 rounded-full bg-[#ffd875] shadow-[0_0_8px_#ffd875]" />
+            </div>
+
+            {/* 4 & 5. Cụm 3 Huy Hiệu Phân Khu bên phải được liên kết bằng đường mạch ánh sáng vàng kim chạy ngang đồng điệu */}
+            <div className="relative flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-2 sm:gap-0 w-full lg:w-auto">
+              {/* HUY HIỆU 1: TINH HOA THẾ GIỚI (Quả địa cầu & Chip Poker) */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleCloseThread();
+                  setSelectedSection('tong-hop-dien-dan');
+                  setSelectedCategory('all');
+                  scrollToForumBoard('smooth');
+                }}
+                className="group relative z-10 flex flex-col items-center px-3 py-2 rounded-xl bg-gradient-to-b from-[#1a1107] to-[#0d0804] border border-[#c89d42]/80 hover:border-[#ffd875] shadow-[0_0_15px_rgba(200,157,66,0.2)] hover:shadow-[0_0_22px_rgba(255,216,117,0.45)] transition-all cursor-pointer min-w-[155px]"
+              >
+                <div className="flex items-center justify-center h-11">
+                  {/* Biểu tượng Quả địa cầu vàng kim + Chip Poker */}
+                  <svg viewBox="0 0 80 48" className="w-16 h-10 overflow-visible">
+                    <defs>
+                      <linearGradient id="goldGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#fff0b8" />
+                        <stop offset="50%" stopColor="#ffd875" />
+                        <stop offset="100%" stopColor="#9c721c" />
+                      </linearGradient>
+                    </defs>
+                    {/* Quả địa cầu */}
+                    <circle cx="28" cy="24" r="15" fill="#0d192b" stroke="url(#goldGrad1)" strokeWidth="2" />
+                    <ellipse cx="28" cy="24" rx="8" ry="15" fill="none" stroke="url(#goldGrad1)" strokeWidth="1.3" />
+                    <line x1="13" y1="24" x2="43" y2="24" stroke="url(#goldGrad1)" strokeWidth="1.3" />
+                    <path d="M16 17 Q28 21 40 17" fill="none" stroke="url(#goldGrad1)" strokeWidth="1.1" />
+                    <path d="M16 31 Q28 27 40 31" fill="none" stroke="url(#goldGrad1)" strokeWidth="1.1" />
+                    {/* Chip Poker lồng bên phải quả địa cầu */}
+                    <circle cx="52" cy="26" r="13" fill="#170e05" stroke="url(#goldGrad1)" strokeWidth="2.2" strokeDasharray="4 2.5" />
+                    <circle cx="52" cy="26" r="9" fill="#241508" stroke="url(#goldGrad1)" strokeWidth="1.2" />
+                    <text x="52" y="30" textAnchor="middle" fill="#ffd875" fontSize="11" fontWeight="bold">♣</text>
+                  </svg>
+                </div>
+                <span className="mt-1 text-[11px] font-black tracking-wider text-[#ffd875] uppercase group-hover:text-white transition-colors">
+                  TINH HOA THẾ GIỚI
+                </span>
+              </button>
+
+              {/* Đường mạch ánh sáng vàng kim chạy ngang nối Huy hiệu 1 -> Huy hiệu 2 */}
+              <div className="hidden sm:flex items-center w-6 md:w-8 shrink-0">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ffd875] shadow-[0_0_8px_#ffd875]" />
+                <div className="flex-1 h-[2px] bg-gradient-to-r from-[#ffd875] via-[#fff2c2] to-[#ffd875] shadow-[0_0_12px_#ffd875]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ffd875] shadow-[0_0_8px_#ffd875]" />
+              </div>
+
+              {/* HUY HIỆU 2: AI TRỌNG TÀI (Cán cân công lý & Chip AI) */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleCloseThread();
+                  setSelectedSection('trao-doi-chinh');
+                  setSelectedCategory('all');
+                  scrollToForumBoard('smooth');
+                }}
+                className="group relative z-10 flex flex-col items-center px-3 py-2 rounded-xl bg-gradient-to-b from-[#1a1107] to-[#0d0804] border border-[#c89d42]/80 hover:border-[#ffd875] shadow-[0_0_15px_rgba(200,157,66,0.2)] hover:shadow-[0_0_22px_rgba(255,216,117,0.45)] transition-all cursor-pointer min-w-[145px]"
+              >
+                <div className="flex items-center justify-center h-11">
+                  {/* Biểu tượng Cán cân công lý + Chip vi mạch AI */}
+                  <svg viewBox="0 0 84 48" className="w-16 h-10 overflow-visible">
+                    {/* Cán cân công lý bên trái */}
+                    <line x1="25" y1="9" x2="25" y2="39" stroke="url(#goldGrad1)" strokeWidth="2.2" />
+                    <line x1="17" y1="39" x2="33" y2="39" stroke="url(#goldGrad1)" strokeWidth="2.2" />
+                    <line x1="12" y1="15" x2="38" y2="15" stroke="url(#goldGrad1)" strokeWidth="2" />
+                    <polygon points="25,6 22,11 28,11" fill="#ffd875" />
+                    {/* Đĩa cân trái */}
+                    <line x1="13" y1="15" x2="10" y2="26" stroke="#ffd875" strokeWidth="1.2" />
+                    <line x1="13" y1="15" x2="16" y2="26" stroke="#ffd875" strokeWidth="1.2" />
+                    <path d="M8 26 Q13 31 18 26 Z" fill="url(#goldGrad1)" />
+                    {/* Đĩa cân phải */}
+                    <line x1="37" y1="15" x2="34" y2="26" stroke="#ffd875" strokeWidth="1.2" />
+                    <line x1="37" y1="15" x2="40" y2="26" stroke="#ffd875" strokeWidth="1.2" />
+                    <path d="M32 26 Q37 31 42 26 Z" fill="url(#goldGrad1)" />
+                    {/* Chip AI bên phải */}
+                    <rect x="49" y="13" width="22" height="22" rx="4" fill="#121e16" stroke="url(#goldGrad1)" strokeWidth="2" />
+                    {/* Chân mạch Chip AI */}
+                    <line x1="54" y1="9" x2="54" y2="13" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="60" y1="9" x2="60" y2="13" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="66" y1="9" x2="66" y2="13" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="54" y1="35" x2="54" y2="39" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="60" y1="35" x2="60" y2="39" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="66" y1="35" x2="66" y2="39" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="71" y1="19" x2="75" y2="19" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="71" y1="25" x2="75" y2="25" stroke="#ffd875" strokeWidth="1.6" />
+                    <line x1="71" y1="31" x2="75" y2="31" stroke="#ffd875" strokeWidth="1.6" />
+                    <text x="60" y="28" textAnchor="middle" fill="#ffd875" fontSize="9.5" fontWeight="900">AI</text>
+                  </svg>
+                </div>
+                <span className="mt-1 text-[11px] font-black tracking-wider text-[#ffd875] uppercase group-hover:text-white transition-colors">
+                  AI TRỌNG TÀI
+                </span>
+              </button>
+
+              {/* Đường mạch ánh sáng vàng kim chạy ngang nối Huy hiệu 2 -> Huy hiệu 3 */}
+              <div className="hidden sm:flex items-center w-6 md:w-8 shrink-0">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ffd875] shadow-[0_0_8px_#ffd875]" />
+                <div className="flex-1 h-[2px] bg-gradient-to-r from-[#ffd875] via-[#fff2c2] to-[#ffd875] shadow-[0_0_12px_#ffd875]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ffd875] shadow-[0_0_8px_#ffd875]" />
+              </div>
+
+              {/* HUY HIỆU 3: LÒ LUYỆN GÀ HÓA SÓI (Quả trứng vàng -> Trứng nứt nở ra chú gà con -> Đầu sói săn mồi uy lực) */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleCloseThread();
+                  setSelectedSection('giang-day-nghien-cuu');
+                  setSelectedCategory('all');
+                  scrollToForumBoard('smooth');
+                }}
+                className="group relative z-10 flex flex-col items-center px-3.5 py-2 rounded-xl bg-gradient-to-b from-[#1a1107] to-[#0d0804] border border-[#c89d42]/80 hover:border-[#ffd875] shadow-[0_0_15px_rgba(200,157,66,0.2)] hover:shadow-[0_0_22px_rgba(255,216,117,0.45)] transition-all cursor-pointer min-w-[195px]"
+              >
+                <div className="flex items-center justify-center h-11">
+                  {/* Tiến trình lột xác trực quan: Quả trứng vàng -> Trứng nứt nở ra chú gà con -> Đầu sói săn mồi uy lực */}
+                  <svg viewBox="0 0 138 48" className="w-32 h-10 overflow-visible">
+                    {/* Bước 1: Quả trứng vàng */}
+                    <path
+                      d="M18 11 C11 11 8 22 8 30 C8 37 12 41 18 41 C24 41 28 37 28 30 C28 22 25 11 18 11 Z"
+                      fill="url(#goldGrad1)"
+                      stroke="#fff3c4"
+                      strokeWidth="1.2"
+                    />
+                    {/* Mũi tên mạch vàng 1 */}
+                    <line x1="31" y1="26" x2="41" y2="26" stroke="#ffd875" strokeWidth="1.8" />
+                    <polygon points="43,26 39,23 39,29" fill="#ffd875" />
+
+                    {/* Bước 2: Trứng nứt nở ra chú gà con */}
+                    {/* Thân và đầu chú gà con */}
+                    <circle cx="59" cy="19" r="7.5" fill="#ffe066" stroke="#b8860b" strokeWidth="1.2" />
+                    <circle cx="57.5" cy="17.5" r="1.3" fill="#140c06" />
+                    <polygon points="66,18 71,20 66,22" fill="#ff9f1c" />
+                    {/* Nửa vỏ trứng vàng nứt bên dưới */}
+                    <path
+                      d="M48 25 L53 29 L57 24 L61 29 L65 24 L70 26 C70 36 65 41 59 41 C53 41 48 36 48 25 Z"
+                      fill="url(#goldGrad1)"
+                      stroke="#fff3c4"
+                      strokeWidth="1.2"
+                    />
+
+                    {/* Mũi tên mạch vàng 2 */}
+                    <line x1="74" y1="26" x2="84" y2="26" stroke="#ffd875" strokeWidth="1.8" />
+                    <polygon points="86,26 82,23 82,29" fill="#ffd875" />
+
+                    {/* Bước 3: Đầu sói săn mồi uy lực */}
+                    <g transform="translate(88, 5)">
+                      {/* Tai & bờm sói */}
+                      <polygon
+                        points="7,16 11,2 20,11 30,11 39,2 43,16 47,26 38,35 25,40 12,35 3,26"
+                        fill="#1c1208"
+                        stroke="url(#goldGrad1)"
+                        strokeWidth="2"
+                      />
+                      {/* Chi tiết bờm & sống mũi sắc bén */}
+                      <polygon points="25,11 19,27 25,35 31,27" fill="url(#goldGrad1)" opacity="0.28" />
+                      {/* Đôi mắt sói sáng rực uy lực */}
+                      <polygon points="13,20 21,23 15,25" fill="#ffd875" />
+                      <polygon points="37,20 29,23 35,25" fill="#ffd875" />
+                      {/* Mũi & nanh sói */}
+                      <polygon points="22,32 28,32 25,36" fill="#ffd875" />
+                    </g>
+                  </svg>
+                </div>
+                <span className="mt-1 text-[11px] font-black tracking-wider text-[#ffd875] uppercase group-hover:text-white transition-colors">
+                  LÒ LUYỆN GÀ HÓA SÓI
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
