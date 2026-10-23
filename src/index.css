@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+body {
+  background-color: #0b0704;
+  background-image: url('/assets/forum/i_background.jpg');
+  background-attachment: fixed;
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: #d1ba88;
+  font-family: Arial, Verdana, Tahoma, sans-serif;
+}
+
+/* Custom scrollbar matching forum */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #120904;
+}
+::-webkit-scrollbar-thumb {
+  background: #8b6b23;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b8933b;
+}
+
+/* Sửa lỗi tràn thanh menu chuyên mục trên màn hình di động */
+.menu-container, .nav-bar, .category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-x: visible;
+}
+
+/* Đảm bảo các nút bấm tự động xuống dòng và co giãn hợp lý */
+.menu-item, .nav-button {
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+
+/* Ẩn hoàn toàn thanh công cụ mặc định của Google Translate để dùng bộ điều khiển VIP của CLB */
+iframe.goog-te-banner-frame,
+.goog-te-banner-frame,
+.skiptranslate > iframe,
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+  visibility: hidden !important;
+}
+body {
+  top: 0px !important;
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+

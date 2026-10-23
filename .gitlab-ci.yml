@@ -1,0 +1,17 @@
+image: node:22-alpine
+
+pages:
+  stage: deploy
+  script:
+    - npm install
+    - npm run build
+    - rm -rf public_pages
+    - mv dist public_pages
+    - rm -rf public
+    - mv public_pages public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+    - master
