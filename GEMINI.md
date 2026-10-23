@@ -47,5 +47,19 @@ Luôn duy trì hệ thống phân quyền thành viên và học viện theo 4 c
 - Bắt buộc đi kèm câu hỏi tình huống thực chiến.
 - Thành viên phải trả lời đúng theo tư duy thực chiến CLB mới được mở khóa cấp độ tiếp theo.
 
+## Quy Chuẩn Bảo Vệ An Toàn Git (github-push-guard)
+1. **QUY TẮC CỐT LÕI (BẮT BUỘC):**
+   - Tuyệt đối KHÔNG BAO GIỜ được tự ý chạy lệnh `git push` hoặc tự động đẩy mã nguồn lên GitHub sau khi chỉnh sửa file, fix bug hay hoàn thiện tính năng.
+   - Mọi thao tác deploy hoặc đồng bộ lên GitHub đều phải ở trạng thái chờ (blocked) cho đến khi có sự cho phép rõ ràng từ người dùng.
+2. **QUY TRÌNH HỎI XÁC NHẬN:**
+   Bất cứ khi nào sửa xong và nhận thấy cần phải đẩy code lên GitHub, phải dừng lại ngay lập tức và xuất ra thông báo theo cấu trúc:
+   - Tóm tắt các file và tính năng vừa thay đổi.
+   - Tên branch và remote repository chuẩn bị push.
+   - Đặt câu hỏi trực tiếp: *"Tôi đã hoàn thiện các thay đổi trên. Bạn có đồng ý cho phép chạy lệnh push lên GitHub không?"*
+3. **ĐIỀU KIỆN THỰC THI:**
+   - Chỉ khi nào người dùng gõ trả lời đồng ý (ví dụ: "ok", "đồng ý", "push đi", "yes"), mới được phép thực thi lệnh git push.
+   - Nếu người dùng chưa xác nhận hoặc yêu cầu sửa thêm, tuyệt đối không được chạm vào lệnh push.
+
+
 
 
