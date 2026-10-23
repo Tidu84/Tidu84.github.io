@@ -2459,15 +2459,16 @@ app.get('/api/forum/admin-report', async (_req, res) => {
 // HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ SEPAY (MBBANK VA) & DUYỆT HẠN MỨC TỰ ĐỘNG
 // Tài khoản MBBank VA: VQRQANAKX0402 - Đơn vị: ForumP
 // Cú pháp chuyển khoản: 
+// - Gói Ngày (5k - Cốc trà đá): "forumD [Mã Đơn]" (VD: forumD CP8392)
 // - Gói Tháng (45k): "forumM [Mã Đơn]" (VD: forumM CP8392)
 // - Gói 1 Năm (450k): "Forum (M) [Mã Đơn]" (VD: Forum (M) CP8392)
 // - Gói 3 Năm (1.125k - Giảm 17%): "forum3Y [Mã Đơn]" hoặc "Forum 3(M) [Mã Đơn]"
-// Hạn mức: >= 45.000đ -> Duyệt 1 Tháng | >= 450.000đ -> Duyệt 1 Năm | >= 1.120.000đ -> Duyệt 3 Năm
+// Hạn mức: >= 5.000đ -> Duyệt 1 Ngày | >= 45.000đ -> Duyệt 1 Tháng | >= 450.000đ -> Duyệt 1 Năm | >= 1.120.000đ -> Duyệt 3 Năm
 // ========================================================
 interface PaidTransaction {
   orderCode: string;
   amount: number;
-  plan: 'month' | 'year' | '3year';
+  plan: 'day' | 'month' | 'year' | '3year';
   activationCode: string;
   sender?: string;
   transactionDate: string;
@@ -2485,20 +2486,22 @@ const handlePaymentWebhook = async (req: any, res: any) => {
     const content = String(body.content || body.description || body.subAccount || body.orderCode || '').toUpperCase();
     const sender = String(body.senderName || body.correspName || body.accountNumber || 'MBBank User');
 
-    if (rawAmount < 45000) {
+    if (rawAmount < 5000) {
       return res.status(400).json({
-        error: 'Số tiền nhỏ hơn hạn mức tối thiểu 45.000đ của CLB'
+        error: 'Số tiền nhỏ hơn hạn mức tối thiểu 5.000đ (Gói 1 Ngày - Cốc trà đá) của CLB'
       });
     }
 
-    // Tự động phân loại hạn mức: >= 1.120k -> 3 Năm (giảm 17%), >= 450k -> 1 Năm (tặng 2 tháng), >= 45k -> 1 Tháng
-    let plan: 'month' | 'year' | '3year' = 'month';
+    // Tự động phân loại hạn mức: >= 1.120k -> 3 Năm, >= 450k -> 1 Năm, >= 45k -> 1 Tháng, >= 5k -> 1 Ngày
+    let plan: 'day' | 'month' | 'year' | '3year' = 'day';
     if (rawAmount >= 1120000 || content.includes('FORUM3Y') || content.includes('FORUM 3Y') || content.includes('FORUM 3(M)')) {
       plan = '3year';
     } else if (rawAmount >= 450000 || content.includes('FORUM (M)') || content.includes('FORUM(M)') || content.includes('FORUMY')) {
       plan = 'year';
-    } else {
+    } else if (rawAmount >= 45000 || content.includes('FORUMM') || content.includes('FORUM M')) {
       plan = 'month';
+    } else {
+      plan = 'day';
     }
 
     // Trích xuất mã đơn dạng CPxxxx hoặc FORUM xxxx trong nội dung chuyển khoản
@@ -2507,7 +2510,7 @@ const handlePaymentWebhook = async (req: any, res: any) => {
     if (cpMatch) {
       matchedOrderCode = cpMatch[0];
     } else {
-      const forumMatch = content.match(/FORUM(?:M|\s*\(M\)|\s*\(?3M\)?|3Y)?\s*(\w+)/);
+      const forumMatch = content.match(/FORUM(?:M|\s*\(M\)|\s*\(?3M\)?|3Y|D|1D)?\s*(\w+)/);
       if (forumMatch && forumMatch[1]) {
         matchedOrderCode = forumMatch[1];
       } else {
@@ -2517,7 +2520,10 @@ const handlePaymentWebhook = async (req: any, res: any) => {
 
     const activationCode = `VIP-${plan.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-    const planLabel = plan === '3year' ? '3 Năm (Giảm 17%)' : (plan === 'year' ? '1 Năm' : '1 Tháng');
+    const planLabel = 
+      plan === '3year' 
+        ? '3 Năm (Giảm 17%)' 
+        : (plan === 'year' ? '1 Năm' : (plan === 'month' ? '1 Tháng' : '1 Ngày (Cốc trà đá)'));
 
     const paidRecord: PaidTransaction = {
       orderCode: matchedOrderCode,
@@ -2537,7 +2543,7 @@ const handlePaymentWebhook = async (req: any, res: any) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'MBBANK_PAYMENT_APPROVED',
-        title: `💰 MBBank (SePay) Tự Động Duyệt Gói ${planLabel} (${rawAmount.toLocaleString('vi-VN')}đ)`,
+        title: `💰 MBBank VA ForumP Tự Động Duyệt Gói ${planLabel} (${rawAmount.toLocaleString('vi-VN')}đ)`,
         ...paidRecord
       })
     }).catch(() => {});
@@ -2569,7 +2575,9 @@ app.get('/api/forum/payment/check-status', (req, res) => {
     const planDurationLabel = 
       found.plan === '3year' 
         ? '3 Năm (1.095 ngày - Giảm 17%)' 
-        : (found.plan === 'year' ? '1 Năm (365 ngày)' : '1 Tháng (30 ngày)');
+        : (found.plan === 'year' 
+            ? '1 Năm (365 ngày)' 
+            : (found.plan === 'month' ? '1 Tháng (30 ngày)' : '1 Ngày (24 giờ - Cốc trà đá)'));
     return res.json({
       paid: true,
       message: `Đã xác thực giao dịch thành công từ MBBank VA ForumP (SePay)! Tự động duyệt gói ${planDurationLabel}.`,
