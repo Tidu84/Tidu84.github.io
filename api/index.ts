@@ -2572,7 +2572,7 @@ app.get('/api/forum/payment/check-status', (req, res) => {
         : (found.plan === 'year' ? '1 Năm (365 ngày)' : '1 Tháng (30 ngày)');
     return res.json({
       paid: true,
-      message: `Đã xác thực giao dịch thành công từ MBBank (SePay)! Tự động duyệt gói ${planDurationLabel}.`,
+      message: `Đã xác thực giao dịch thành công từ MBBank VA ForumP (SePay)! Tự động duyệt gói ${planDurationLabel}.`,
       plan: found.plan,
       activationCode: found.activationCode,
       amount: found.amount,
@@ -2582,7 +2582,7 @@ app.get('/api/forum/payment/check-status', (req, res) => {
 
   return res.json({
     paid: false,
-    message: `Hệ thống kiểm tra tài khoản MBBank 0906998966 chưa nhận được số tiền với nội dung chứa mã "${code}". Quý khách vui lòng hoàn tất chuyển khoản trong ứng dụng ngân hàng rồi kiểm tra lại nhé!`
+    message: `Hệ thống kiểm tra tài khoản MBBank VA ForumP (VQRQANAKX0402) chưa nhận được số tiền với nội dung chứa mã "${code}". Quý khách vui lòng hoàn tất chuyển khoản trong ứng dụng ngân hàng rồi kiểm tra lại nhé!`
   });
 });
 

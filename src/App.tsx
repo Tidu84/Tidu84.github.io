@@ -523,9 +523,9 @@ export default function App() {
   const [qrOrderCode] = useState<string>(() => 'CP' + Math.floor(1000 + Math.random() * 9000));
 
   const VIETQR_BANK_ID = 'MB';
-  const VIETQR_BANK_NAME = 'MBBank (Quân Đội)';
-  const VIETQR_ACCOUNT_NO = '0906998966';
-  const VIETQR_ACCOUNT_NAME = 'NGUYEN TIEN DUNG';
+  const VIETQR_BANK_NAME = 'MBBank (Định Danh VA)';
+  const VIETQR_ACCOUNT_NO = 'VQRQANAKX0402';
+  const VIETQR_ACCOUNT_NAME = 'ForumP';
 
   // Phiên mở khóa bản dịch các bình luận khác dưới 1 chủ đề (xem QC 30s -> xem được 30 phút cho đúng chủ đề đó)
   const [commentsUnlockSession, setCommentsUnlockSession] = useState<{ threadId: string; expiresAt: number } | null>(() => {
@@ -4127,7 +4127,7 @@ export default function App() {
                   <span>ĐẶC QUYỀN CỐ VẤN AI & KHUYẾN NGHỊ THỰC CHIẾN</span>
                 </div>
                 <p className="text-[11px] text-[#e6cb9c] leading-relaxed">
-                  Tính năng <strong>Cố Vấn Chiến Thuật AI</strong> dành riêng cho thành viên ủng hộ CLB. Quý Cao thủ vui lòng <strong>Subscribe kênh YouTube @choipoker</strong> (kèm xem video 30s) hoặc <strong>Quét mã VietQR (MBBank 0906998966)</strong> để mở khóa ngay nhé!
+                  Tính năng <strong>Cố Vấn Chiến Thuật AI</strong> dành riêng cho thành viên ủng hộ CLB. Quý Cao thủ vui lòng <strong>Subscribe kênh YouTube @choipoker</strong> (kèm xem video 30s) hoặc <strong>Quét mã VietQR (MBBank - ForumP)</strong> để mở khóa ngay nhé!
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 pt-1">
                   <a
@@ -5371,7 +5371,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Khung Quét Mã VietQR Tự Động Mở Khóa 100% (Vietcombank 9906998966 - NGUYEN TIEN DUNG) */}
+                {/* Khung Quét Mã VietQR Tự Động Mở Khóa 100% (MBBank VA: VQRQANAKX0402 - ForumP) */}
                 <div className="p-3.5 rounded-xl bg-[#0d0703] border border-amber-500/50 flex flex-col sm:flex-row items-center gap-4">
                   <div className="bg-white p-2 rounded-xl shrink-0 shadow-lg border-2 border-[#ffd875]">
                     <img
@@ -5407,12 +5407,12 @@ export default function App() {
                         <span className="font-bold text-[#f5dfb0]">{VIETQR_BANK_NAME}</span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-[#9e8052]">Số tài khoản:</span>
+                        <span className="text-[#9e8052]">Tài khoản ảo (VA):</span>
                         <span className="font-black text-[#ffd875] tracking-wider">{VIETQR_ACCOUNT_NO}</span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-[#9e8052]">Chủ tài khoản:</span>
-                        <span className="font-bold text-[#f5dfb0]">{VIETQR_ACCOUNT_NAME}</span>
+                        <span className="text-[#9e8052]">Đơn vị thụ hưởng:</span>
+                        <span className="font-bold text-amber-300">{VIETQR_ACCOUNT_NAME}</span>
                       </div>
                       <div className="flex justify-between gap-2">
                         <span className="text-[#9e8052]">Số tiền tự điền:</span>
