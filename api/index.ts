@@ -2457,13 +2457,16 @@ app.get('/api/forum/admin-report', async (_req, res) => {
 
 // ========================================================
 // HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ VIETCOMBANK & DUYỆT HẠN MỨC TỰ ĐỘNG
-// Cú pháp chuyển khoản: "FORUM [Mã Đơn]" (VD: FORUM CP8392)
-// Hạn mức: >= 49.000đ -> Duyệt 1 Tháng | >= 490.000đ -> Duyệt 1 Năm
+// Cú pháp chuyển khoản: 
+// - Gói Tháng (45k): "forumM [Mã Đơn]" (VD: forumM CP8392)
+// - Gói 1 Năm (450k): "Forum (M) [Mã Đơn]" (VD: Forum (M) CP8392)
+// - Gói 3 Năm (1.120k - Giảm 17%): "forum3Y [Mã Đơn]" hoặc "Forum 3(M) [Mã Đơn]"
+// Hạn mức: >= 45.000đ -> Duyệt 1 Tháng | >= 450.000đ -> Duyệt 1 Năm | >= 1.120.000đ -> Duyệt 3 Năm
 // ========================================================
 interface PaidTransaction {
   orderCode: string;
   amount: number;
-  plan: 'month' | 'year';
+  plan: 'month' | 'year' | '3year';
   activationCode: string;
   sender?: string;
   transactionDate: string;
@@ -2481,14 +2484,21 @@ app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
     const content = String(body.content || body.description || body.subAccount || body.orderCode || '').toUpperCase();
     const sender = String(body.senderName || body.correspName || body.accountNumber || 'Vietcombank User');
 
-    if (rawAmount < 49000) {
+    if (rawAmount < 45000) {
       return res.status(400).json({
-        error: 'Số tiền nhỏ hơn hạn mức tối thiểu 49.000đ của CLB'
+        error: 'Số tiền nhỏ hơn hạn mức tối thiểu 45.000đ của CLB'
       });
     }
 
-    // Tự động phân loại hạn mức: >= 490k -> 1 Năm (tặng 2 tháng), >= 49k -> 1 Tháng
-    const plan: 'month' | 'year' = rawAmount >= 490000 ? 'year' : 'month';
+    // Tự động phân loại hạn mức: >= 1.120k -> 3 Năm (giảm 17%), >= 450k -> 1 Năm (tặng 2 tháng), >= 45k -> 1 Tháng
+    let plan: 'month' | 'year' | '3year' = 'month';
+    if (rawAmount >= 1120000 || content.includes('FORUM3Y') || content.includes('FORUM 3Y') || content.includes('FORUM 3(M)')) {
+      plan = '3year';
+    } else if (rawAmount >= 450000 || content.includes('FORUM (M)') || content.includes('FORUM(M)') || content.includes('FORUMY')) {
+      plan = 'year';
+    } else {
+      plan = 'month';
+    }
 
     // Trích xuất mã đơn dạng CPxxxx hoặc FORUM xxxx trong nội dung chuyển khoản
     let matchedOrderCode = '';
@@ -2496,8 +2506,8 @@ app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
     if (cpMatch) {
       matchedOrderCode = cpMatch[0];
     } else {
-      const forumMatch = content.match(/FORUM\s*(\w+)/);
-      if (forumMatch) {
+      const forumMatch = content.match(/FORUM(?:M|\s*\(M\)|\s*\(?3M\)?|3Y)?\s*(\w+)/);
+      if (forumMatch && forumMatch[1]) {
         matchedOrderCode = forumMatch[1];
       } else {
         matchedOrderCode = 'GLOBAL_' + Date.now();
@@ -2505,6 +2515,8 @@ app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
     }
 
     const activationCode = `VIP-${plan.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    const planLabel = plan === '3year' ? '3 Năm (Giảm 17%)' : (plan === 'year' ? '1 Năm' : '1 Tháng');
 
     const paidRecord: PaidTransaction = {
       orderCode: matchedOrderCode,
@@ -2524,14 +2536,14 @@ app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'VCB_PAYMENT_APPROVED',
-        title: `💰 Vietcombank Tự Động Duyệt Gói ${plan === 'month' ? '1 Tháng' : '1 Năm'} (${rawAmount.toLocaleString('vi-VN')}đ)`,
+        title: `💰 Vietcombank Tự Động Duyệt Gói ${planLabel} (${rawAmount.toLocaleString('vi-VN')}đ)`,
         ...paidRecord
       })
     }).catch(() => {});
 
     res.json({
       success: true,
-      message: `Đã duyệt tự động hạn mức gói ${plan === 'month' ? '1 Tháng' : '1 Năm'} thành công!`,
+      message: `Đã duyệt tự động hạn mức gói ${planLabel} thành công!`,
       paidRecord
     });
   } catch (err: any) {
@@ -2550,9 +2562,13 @@ app.get('/api/forum/payment/check-status', (req, res) => {
   // Tìm trong danh sách giao dịch đã thực sự được ngân hàng xác nhận
   const found = PAID_TRANSACTIONS[code];
   if (found) {
+    const planDurationLabel = 
+      found.plan === '3year' 
+        ? '3 Năm (1.095 ngày - Giảm 17%)' 
+        : (found.plan === 'year' ? '1 Năm (365 ngày)' : '1 Tháng (30 ngày)');
     return res.json({
       paid: true,
-      message: `Đã xác thực giao dịch thành công từ Vietcombank! Tự động duyệt gói ${found.plan === 'month' ? '1 Tháng (30 ngày)' : '1 Năm (365 ngày)'}.`,
+      message: `Đã xác thực giao dịch thành công từ Vietcombank! Tự động duyệt gói ${planDurationLabel}.`,
       plan: found.plan,
       activationCode: found.activationCode,
       amount: found.amount,

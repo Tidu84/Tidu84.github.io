@@ -440,8 +440,9 @@ export default function App() {
   const AD_DURATION_SECONDS = 60; // Quảng cáo dài 60 giây khi đổi ngôn ngữ toàn chủ đề sang ngoại ngữ
   const AD_COMMENTS_DURATION_SECONDS = 30; // Quảng cáo 30 giây khi mở khóa dịch các bình luận khác sang ngôn ngữ bản địa
   const SINGLE_TOPIC_DURATION_MS = 30 * 60 * 1000; // Thời hạn xem bản dịch 1 chủ đề: 30 phút
-  const MONTHLY_PRICE_VND = 49000; // 49.000đ / tháng
-  const YEARLY_PRICE_VND = MONTHLY_PRICE_VND * 10; // Gói năm tính = 10 tháng (490.000đ / năm)
+  const MONTHLY_PRICE_VND = 45000; // 45.000đ / tháng
+  const YEARLY_PRICE_VND = 450000; // Gói năm tính = 10 tháng (450.000đ / năm)
+  const THREE_YEAR_PRICE_VND = 1120000; // Gói 3 năm (1.120.000đ / 3 năm - Giảm 17%)
 
   // Danh sách video chính thức từ kênh YouTube @choipoker của chủ diễn đàn
   const CHOIPOKER_YOUTUBE_VIDEOS = [
@@ -502,7 +503,7 @@ export default function App() {
   }
 
   interface LangSubscription {
-    plan: 'month' | 'year';
+    plan: 'month' | 'year' | '3year';
     expiresAt: number;
   }
 
@@ -515,7 +516,7 @@ export default function App() {
   const [adPlaying, setAdPlaying] = useState<boolean>(false);
   const [adSecondsLeft, setAdSecondsLeft] = useState<number>(AD_DURATION_SECONDS);
   const [activeYoutubeIdx, setActiveYoutubeIdx] = useState<number>(0);
-  const [selectedSubPlan, setSelectedSubPlan] = useState<'month' | 'year'>('year');
+  const [selectedSubPlan, setSelectedSubPlan] = useState<'month' | 'year' | '3year'>('year');
   const [subCodeInput, setSubCodeInput] = useState<string>('');
   const [verifyingQrPayment, setVerifyingQrPayment] = useState<boolean>(false);
   const [verifyQrCountdown, setVerifyQrCountdown] = useState<number>(0);
@@ -744,13 +745,16 @@ export default function App() {
         setVerifyingQrPayment(false);
 
         if (data.paid) {
-          const approvedPlan = data.plan || selectedSubPlan;
+          const approvedPlan = (data.plan as 'month' | 'year' | '3year') || selectedSubPlan;
+          let durationMs = 30 * 24 * 60 * 60 * 1000;
+          if (approvedPlan === '3year') {
+            durationMs = 3 * 365 * 24 * 60 * 60 * 1000;
+          } else if (approvedPlan === 'year') {
+            durationMs = 365 * 24 * 60 * 60 * 1000;
+          }
           const sub: LangSubscription = {
             plan: approvedPlan,
-            expiresAt:
-              approvedPlan === 'month'
-                ? Date.now() + 30 * 24 * 60 * 60 * 1000
-                : Date.now() + 365 * 24 * 60 * 60 * 1000
+            expiresAt: Date.now() + durationMs
           };
           setLangSub(sub);
           localStorage.setItem('hocpoker_lang_sub', JSON.stringify(sub));
@@ -761,7 +765,13 @@ export default function App() {
           confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
           alert(`🎉 CHÚC MỪNG!\n${data.message}\nMã kích hoạt VIP của Quý khách: ${data.activationCode}`);
         } else {
-          alert(`⚠️ CHƯA NHẬN ĐƯỢC TIỀN VÀO VIETCOMBANK:\n\n${data.message}\n\n👉 Vui lòng mở ứng dụng ngân hàng, kiểm tra đã bấm "Xác nhận chuyển khoản" thành công với nội dung "FORUM ${qrOrderCode}" chưa nhé!`);
+          const currentMemo =
+            selectedSubPlan === '3year'
+              ? `forum3Y ${qrOrderCode}`
+              : selectedSubPlan === 'year'
+              ? `Forum (M) ${qrOrderCode}`
+              : `forumM ${qrOrderCode}`;
+          alert(`⚠️ CHƯA NHẬN ĐƯỢC TIỀN VÀO VIETCOMBANK:\n\n${data.message}\n\n👉 Vui lòng mở ứng dụng ngân hàng, kiểm tra đã bấm "Xác nhận chuyển khoản" thành công với nội dung "${currentMemo}" chưa nhé!`);
         }
       }, 3500);
     } catch (e) {
@@ -775,7 +785,7 @@ export default function App() {
   const handleActivateSubscription = (e: React.FormEvent) => {
     e.preventDefault();
     const code = subCodeInput.trim().toUpperCase();
-    if (code === 'SUBMONTH' || code === 'THANG' || code === 'VIPMONTH') {
+    if (code === 'SUBMONTH' || code === 'THANG' || code === 'VIPMONTH' || code === 'FORUMM') {
       const sub: LangSubscription = {
         plan: 'month',
         expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
@@ -785,7 +795,7 @@ export default function App() {
       if (pendingLang) applyLanguageToDOM(pendingLang);
       setShowLangModal(false);
       setSubCodeInput('');
-    } else if (code === 'SUBYEAR' || code === 'NAM' || code === 'VIPYEAR' || code === 'VIPPOKER') {
+    } else if (code === 'SUBYEAR' || code === 'NAM' || code === 'VIPYEAR' || code === 'VIPPOKER' || code === 'FORUM (M)' || code === 'FORUM(M)') {
       const sub: LangSubscription = {
         plan: 'year',
         expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000
@@ -795,13 +805,25 @@ export default function App() {
       if (pendingLang) applyLanguageToDOM(pendingLang);
       setShowLangModal(false);
       setSubCodeInput('');
+    } else if (code === 'SUB3YEAR' || code === '3NAM' || code === 'VIP3YEAR' || code === 'FORUM3Y' || code === 'FORUM 3(M)' || code === 'FORUM3M') {
+      const sub: LangSubscription = {
+        plan: '3year',
+        expiresAt: Date.now() + 3 * 365 * 24 * 60 * 60 * 1000
+      };
+      setLangSub(sub);
+      localStorage.setItem('hocpoker_lang_sub', JSON.stringify(sub));
+      if (pendingLang) applyLanguageToDOM(pendingLang);
+      setShowLangModal(false);
+      setSubCodeInput('');
     } else {
+      const planName =
+        selectedSubPlan === '3year'
+          ? 'Gói 3 Năm (Giảm 17%): 1.120.000đ'
+          : selectedSubPlan === 'year'
+          ? 'Gói 1 Năm: 450.000đ'
+          : 'Gói 1 Tháng: 45.000đ';
       alert(
-        `Vui lòng hoàn tất đăng ký gói thuê bao (${
-          selectedSubPlan === 'month'
-            ? 'Gói 1 Tháng: 49.000đ ($1.99)'
-            : 'Gói 1 Năm (tính = 10 tháng): 490.000đ ($19.90)'
-        }) để nhận mã kích hoạt, hoặc chọn Xem Quảng Cáo để dịch miễn phí 1 chủ đề trong 30 phút!`
+        `Vui lòng hoàn tất đăng ký gói thuê bao (${planName}) để nhận mã kích hoạt, hoặc chọn Xem Quảng Cáo để dịch miễn phí 1 chủ đề trong 30 phút!`
       );
     }
   };
@@ -5266,45 +5288,85 @@ export default function App() {
                   Nếu Quý Cao thủ muốn tận hưởng cảm giác đọc thông suốt toàn bộ kho tàng kiến thức trên diễn đàn mà không cần chờ đợi một giây quảng cáo nào, CLB trân trọng gửi tới Quý khách 2 gói Hội viên ưu đãi định kỳ:
                 </p>
 
-                {/* Chọn gói Tháng hoặc Năm (= 10 tháng) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Chọn gói Tháng, Năm (= 10 tháng), hoặc 3 Năm (-17%) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {/* Gói Tháng */}
                   <div
                     onClick={() => setSelectedSubPlan('month')}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    className={`p-2.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                       selectedSubPlan === 'month'
-                        ? 'bg-[#2c190a] border-[#ffd875] shadow-md'
+                        ? 'bg-[#2c190a] border-[#ffd875] shadow-md ring-1 ring-[#ffd875]/40'
                         : 'bg-[#120a04] border-[#3d2712] opacity-80 hover:opacity-100'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-[#e6cb9c]">Hội Viên Theo Tháng</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1d1107] text-[#b39562]">30 ngày</span>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-[#e6cb9c]">1 Tháng</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1d1107] text-[#b39562]">30 ngày</span>
+                      </div>
+                      <div className="text-base font-black text-[#ffd875] mt-1">
+                        {MONTHLY_PRICE_VND.toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-[10px] text-[#8c6b45] mt-0.5">Trải nghiệm linh hoạt ($1.79)</div>
                     </div>
-                    <div className="text-base font-black text-[#ffd875] mt-1">
-                      {MONTHLY_PRICE_VND.toLocaleString('vi-VN')}đ <span className="text-[11px] font-normal text-[#b39562]">/ tháng</span>
+                    <div className="text-[9px] text-amber-400/80 font-mono mt-1 pt-1 border-t border-[#26150a]">
+                      Cú pháp: <span className="font-bold text-amber-300">forumM</span>
                     </div>
-                    <div className="text-[10px] text-[#8c6b45] mt-0.5">Trải nghiệm linh hoạt ($1.99 / tháng)</div>
                   </div>
 
+                  {/* Gói 1 Năm */}
                   <div
                     onClick={() => setSelectedSubPlan('year')}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all relative ${
+                    className={`p-2.5 rounded-xl border cursor-pointer transition-all relative flex flex-col justify-between ${
                       selectedSubPlan === 'year'
-                        ? 'bg-[#2c190a] border-[#ffd875] shadow-md'
+                        ? 'bg-[#2c190a] border-[#ffd875] shadow-md ring-1 ring-[#ffd875]/40'
                         : 'bg-[#120a04] border-[#3d2712] opacity-80 hover:opacity-100'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-amber-300">Hội Viên Theo Năm</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black">
-                        Tặng 2 Tháng
-                      </span>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-amber-300">1 Năm</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black">
+                          Tặng 2 Tháng
+                        </span>
+                      </div>
+                      <div className="text-base font-black text-[#ffd875] mt-1">
+                        {YEARLY_PRICE_VND.toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">
+                        Chỉ tính 10 tháng (~37k/tháng)
+                      </div>
                     </div>
-                    <div className="text-base font-black text-[#ffd875] mt-1">
-                      {YEARLY_PRICE_VND.toLocaleString('vi-VN')}đ <span className="text-[11px] font-normal text-[#b39562]">/ năm</span>
+                    <div className="text-[9px] text-amber-400/80 font-mono mt-1 pt-1 border-t border-[#26150a]">
+                      Cú pháp: <span className="font-bold text-amber-300">Forum (M)</span>
                     </div>
-                    <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">
-                      Tri ân chỉ tính phí 10 tháng ($19.90 / năm)
+                  </div>
+
+                  {/* Gói 3 Năm - Giảm 17% */}
+                  <div
+                    onClick={() => setSelectedSubPlan('3year')}
+                    className={`p-2.5 rounded-xl border cursor-pointer transition-all relative flex flex-col justify-between ${
+                      selectedSubPlan === '3year'
+                        ? 'bg-[#2c190a] border-emerald-400 shadow-md ring-1 ring-emerald-400/40'
+                        : 'bg-[#120a04] border-[#3d2712] opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-emerald-300">3 Năm</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-slate-950 font-black">
+                          🔥 Giảm 17%
+                        </span>
+                      </div>
+                      <div className="text-base font-black text-emerald-400 mt-1">
+                        {THREE_YEAR_PRICE_VND.toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-[10px] text-emerald-300 font-semibold mt-0.5">
+                        1.095 ngày (Tiết kiệm 230k)
+                      </div>
+                    </div>
+                    <div className="text-[9px] text-amber-400/80 font-mono mt-1 pt-1 border-t border-[#26150a]">
+                      Cú pháp: <span className="font-bold text-amber-300">forum3Y</span>
                     </div>
                   </div>
                 </div>
@@ -5314,9 +5376,17 @@ export default function App() {
                   <div className="bg-white p-2 rounded-xl shrink-0 shadow-lg border-2 border-[#ffd875]">
                     <img
                       src={`https://img.vietqr.io/image/${VIETQR_BANK_ID}-${VIETQR_ACCOUNT_NO}-compact2.png?amount=${
-                        selectedSubPlan === 'month' ? MONTHLY_PRICE_VND : YEARLY_PRICE_VND
+                        selectedSubPlan === '3year'
+                          ? THREE_YEAR_PRICE_VND
+                          : selectedSubPlan === 'year'
+                          ? YEARLY_PRICE_VND
+                          : MONTHLY_PRICE_VND
                       }&addInfo=${encodeURIComponent(
-                        `FORUM ${qrOrderCode}`
+                        selectedSubPlan === '3year'
+                          ? `forum3Y ${qrOrderCode}`
+                          : selectedSubPlan === 'year'
+                          ? `Forum (M) ${qrOrderCode}`
+                          : `forumM ${qrOrderCode}`
                       )}&accountName=${encodeURIComponent(VIETQR_ACCOUNT_NAME)}`}
                       alt="Mã VietQR Tự Động Mở Khóa"
                       className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded"
@@ -5347,13 +5417,22 @@ export default function App() {
                       <div className="flex justify-between gap-2">
                         <span className="text-[#9e8052]">Số tiền tự điền:</span>
                         <span className="font-black text-emerald-400">
-                          {(selectedSubPlan === 'month' ? MONTHLY_PRICE_VND : YEARLY_PRICE_VND).toLocaleString('vi-VN')}đ
+                          {(selectedSubPlan === '3year'
+                            ? THREE_YEAR_PRICE_VND
+                            : selectedSubPlan === 'year'
+                            ? YEARLY_PRICE_VND
+                            : MONTHLY_PRICE_VND
+                          ).toLocaleString('vi-VN')}đ
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
                         <span className="text-[#9e8052]">Nội dung CK:</span>
-                        <span className="font-black text-amber-300">
-                          FORUM {qrOrderCode}
+                        <span className="font-black text-amber-300 font-mono">
+                          {selectedSubPlan === '3year'
+                            ? `forum3Y ${qrOrderCode}`
+                            : selectedSubPlan === 'year'
+                            ? `Forum (M) ${qrOrderCode}`
+                            : `forumM ${qrOrderCode}`}
                         </span>
                       </div>
                     </div>
