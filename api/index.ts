@@ -2456,12 +2456,12 @@ app.get('/api/forum/admin-report', async (_req, res) => {
 });
 
 // ========================================================
-// HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ SEPAY (MBBANK) & DUYỆT HẠN MỨC TỰ ĐỘNG
-// Tài khoản MBBank: 0906998966 - NGUYEN TIEN DUNG
+// HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ SEPAY (MBBANK VA) & DUYỆT HẠN MỨC TỰ ĐỘNG
+// Tài khoản MBBank VA: VQRQANAKX0402 - Đơn vị: ForumP
 // Cú pháp chuyển khoản: 
 // - Gói Tháng (45k): "forumM [Mã Đơn]" (VD: forumM CP8392)
 // - Gói 1 Năm (450k): "Forum (M) [Mã Đơn]" (VD: Forum (M) CP8392)
-// - Gói 3 Năm (1.120k - Giảm 17%): "forum3Y [Mã Đơn]" hoặc "Forum 3(M) [Mã Đơn]"
+// - Gói 3 Năm (1.125k - Giảm 17%): "forum3Y [Mã Đơn]" hoặc "Forum 3(M) [Mã Đơn]"
 // Hạn mức: >= 45.000đ -> Duyệt 1 Tháng | >= 450.000đ -> Duyệt 1 Năm | >= 1.120.000đ -> Duyệt 3 Năm
 // ========================================================
 interface PaidTransaction {

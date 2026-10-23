@@ -442,7 +442,7 @@ export default function App() {
   const SINGLE_TOPIC_DURATION_MS = 30 * 60 * 1000; // Thời hạn xem bản dịch 1 chủ đề: 30 phút
   const MONTHLY_PRICE_VND = 45000; // 45.000đ / tháng
   const YEARLY_PRICE_VND = 450000; // Gói năm tính = 10 tháng (450.000đ / năm)
-  const THREE_YEAR_PRICE_VND = 1120000; // Gói 3 năm (1.120.000đ / 3 năm - Giảm 17%)
+  const THREE_YEAR_PRICE_VND = 1125000; // Gói 3 năm (1.125.000đ / 3 năm - Giảm 17%)
 
   // Danh sách video chính thức từ kênh YouTube @choipoker của chủ diễn đàn
   const CHOIPOKER_YOUTUBE_VIDEOS = [
@@ -818,7 +818,7 @@ export default function App() {
     } else {
       const planName =
         selectedSubPlan === '3year'
-          ? 'Gói 3 Năm (Giảm 17%): 1.120.000đ'
+          ? 'Gói 3 Năm (Giảm 17%): 1.125.000đ'
           : selectedSubPlan === 'year'
           ? 'Gói 1 Năm: 450.000đ'
           : 'Gói 1 Tháng: 45.000đ';
@@ -5362,7 +5362,7 @@ export default function App() {
                         {THREE_YEAR_PRICE_VND.toLocaleString('vi-VN')}đ
                       </div>
                       <div className="text-[10px] text-emerald-300 font-semibold mt-0.5">
-                        1.095 ngày (Tiết kiệm 230k)
+                        1.095 ngày (Tiết kiệm 225k)
                       </div>
                     </div>
                     <div className="text-[9px] text-amber-400/80 font-mono mt-1 pt-1 border-t border-[#26150a]">
@@ -5373,7 +5373,7 @@ export default function App() {
 
                 {/* Khung Quét Mã VietQR Tự Động Mở Khóa 100% (MBBank VA: VQRQANAKX0402 - ForumP) */}
                 <div className="p-3.5 rounded-xl bg-[#0d0703] border border-amber-500/50 flex flex-col sm:flex-row items-center gap-4">
-                  <div className="bg-white p-2 rounded-xl shrink-0 shadow-lg border-2 border-[#ffd875]">
+                  <div className="bg-white p-2 rounded-xl shrink-0 shadow-lg border-2 border-[#ffd875] text-center">
                     <img
                       src={`https://img.vietqr.io/image/${VIETQR_BANK_ID}-${VIETQR_ACCOUNT_NO}-compact2.png?amount=${
                         selectedSubPlan === '3year'
@@ -5391,6 +5391,9 @@ export default function App() {
                       alt="Mã VietQR Tự Động Mở Khóa"
                       className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded"
                     />
+                    <div className="text-[10px] font-black text-slate-800 mt-1 bg-amber-200/80 rounded py-0.5 px-1">
+                      {selectedSubPlan === '3year' ? 'Gói 3 Năm (1.125k)' : selectedSubPlan === 'year' ? 'Gói 1 Năm (450k)' : 'Gói 1 Tháng (45k)'}
+                    </div>
                   </div>
 
                   <div className="flex-1 space-y-2 text-left w-full">
@@ -5399,6 +5402,46 @@ export default function App() {
                       <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-600/60 text-emerald-300 text-[10px]">
                         Tự động 100%
                       </span>
+                    </div>
+
+                    {/* 3 Nút Chọn Nhanh Mã QR: 45k - 450k - 1125k */}
+                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#160c05] rounded-lg border border-[#382312]">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSubPlan('month')}
+                        className={`py-1.5 px-1 rounded text-center transition-all ${
+                          selectedSubPlan === 'month'
+                            ? 'bg-gradient-to-r from-[#ffd875] to-[#c79832] text-slate-950 font-black shadow'
+                            : 'text-[#d1ba88] hover:text-[#ffd875] bg-[#221308]'
+                        }`}
+                      >
+                        <div className="text-[10px] font-semibold">Gói Tháng</div>
+                        <div className="text-xs font-black">45.000đ</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSubPlan('year')}
+                        className={`py-1.5 px-1 rounded text-center transition-all ${
+                          selectedSubPlan === 'year'
+                            ? 'bg-gradient-to-r from-[#ffd875] to-[#c79832] text-slate-950 font-black shadow'
+                            : 'text-[#d1ba88] hover:text-[#ffd875] bg-[#221308]'
+                        }`}
+                      >
+                        <div className="text-[10px] font-semibold">Gói 1 Năm</div>
+                        <div className="text-xs font-black">450.000đ</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSubPlan('3year')}
+                        className={`py-1.5 px-1 rounded text-center transition-all ${
+                          selectedSubPlan === '3year'
+                            ? 'bg-gradient-to-r from-emerald-400 to-emerald-600 text-slate-950 font-black shadow'
+                            : 'text-emerald-400 hover:text-emerald-300 bg-[#162215]'
+                        }`}
+                      >
+                        <div className="text-[10px] font-semibold">Gói 3 Năm</div>
+                        <div className="text-xs font-black">1.125.000đ</div>
+                      </button>
                     </div>
 
                     <div className="p-2.5 rounded-lg bg-[#160c05] border border-[#382312] space-y-1 text-[11px]">
