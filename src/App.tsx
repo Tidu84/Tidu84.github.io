@@ -2306,141 +2306,12 @@ export default function App() {
                   </div>
                 )}
 
-                {/* 2. BẢN DỊCH & PHÂN TÍCH CHI TIẾT BÀI VIẾT CỦA TÁC GIẢ SANG NGÔN NGỮ BẢN ĐỊA (MIỄN PHÍ 100%) */}
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <h3 className="text-sm font-bold text-[#f5d77f] uppercase tracking-wide flex items-center gap-1.5">
-                        <BarChart3 className="w-4 h-4 text-[#e6b84d]" />
-                        {activeThread.mainSection === 'tong-hop-dien-dan'
-                          ? 'Bản dịch nội dung bài viết & Phân tích sang ngôn ngữ bản địa:'
-                          : activeThread.mainSection === 'trao-doi-chinh'
-                          ? 'Nội dung phân tích sâu vấn đề & Hệ thống tư duy CLB:'
-                          : 'Nội dung bài giảng & giáo trình đào tạo:'}
-                      </h3>
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-600/60 text-emerald-300 text-[10px] font-bold">
-                        ✓ Miễn phí bản dịch bài viết chính ({SUPPORTED_LANGUAGES.find((l) => l.code === nativeLang)?.flag}{' '}
-                        {SUPPORTED_LANGUAGES.find((l) => l.code === nativeLang)?.label})
-                      </span>
-                    </div>
-                    <div className="bg-[#120a05] border border-[#382312] rounded-lg p-4 text-xs sm:text-sm text-[#f0dfc0] leading-relaxed whitespace-pre-wrap">
-                      {activeThread.detailedAnalysis}
-                    </div>
+                {/* TÓM TẮT NỘI DUNG CHỦ ĐỀ NẾU KHÔNG CÓ HAND HISTORY */}
+                {!activeThread.handHistory && activeThread.summary && (
+                  <div className="bg-[#120a05] border border-[#382312] rounded-lg p-4 text-xs sm:text-sm text-[#f0dfc0] leading-relaxed whitespace-pre-wrap">
+                    {activeThread.summary}
                   </div>
-
-                  {/* Khuyến Nghị AI & Đúc Kết Thực Chiến (Yêu cầu Subscribe YouTube @choipoker hoặc Quét VietQR, không mở miễn phí) */}
-                  {(activeThread.gtoRecommendations || activeThread.keyTakeaways) && (
-                    <div className="space-y-3 pt-1">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5">
-                          <Cpu className="w-4 h-4" />
-                          {activeThread.mainSection === 'trao-doi-chinh'
-                            ? '🤖 AI Khuyến nghị: Giải pháp khắc phục & Nguyên tắc kỷ luật thực chiến:'
-                            : '🤖 AI Khuyến nghị: Giải pháp Solver & Khai thác thực tế:'}
-                        </h3>
-                        {areCommentsUnlockedForTopic(activeThread.id) ? (
-                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/70 text-emerald-300 text-[10px] font-bold">
-                            ✓ Đã mở khóa AI Khuyến nghị
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-500/70 text-amber-300 text-[10px] font-bold flex items-center gap-1">
-                            <Lock className="w-3 h-3" />
-                            Cần Subscribe YouTube @choipoker hoặc Quét QR
-                          </span>
-                        )}
-                      </div>
-
-                      {areCommentsUnlockedForTopic(activeThread.id) ? (
-                        <>
-                          {activeThread.gtoRecommendations && (
-                            <div className="bg-[#0c140e] border border-[#1b3d24] rounded-lg p-4 text-xs sm:text-sm text-[#c8eed0] leading-relaxed whitespace-pre-wrap">
-                              {activeThread.gtoRecommendations}
-                            </div>
-                          )}
-
-                          {activeThread.keyTakeaways && (
-                            <div className="p-3.5 rounded-lg bg-[#24160a] border border-[#573516] space-y-1.5">
-                              <h4 className="text-xs font-bold text-amber-300 uppercase flex items-center gap-1">
-                                <Award className="w-3.5 h-3.5 text-amber-400" />
-                                Đúc kết bài học cốt lõi:
-                              </h4>
-                              <ul className="list-disc list-inside space-y-1 text-xs text-[#fce8ba]">
-                                {activeThread.keyTakeaways.map((item, idx) => (
-                                  <li key={idx} className="leading-relaxed">
-                                    {item}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="rounded-xl bg-gradient-to-br from-[#0c1610] via-[#131e15] to-[#1a1007] border-2 border-amber-500/80 p-4 space-y-3 shadow-xl relative overflow-hidden">
-                          {/* Nội dung AI Khuyến nghị bị làm mờ */}
-                          <div className="space-y-2 blur-[5px] select-none pointer-events-none opacity-35">
-                            {activeThread.gtoRecommendations && (
-                              <div className="bg-[#0c140e] border border-[#1b3d24] rounded-lg p-3 text-xs text-[#c8eed0] line-clamp-3">
-                                {activeThread.gtoRecommendations}
-                              </div>
-                            )}
-                            {activeThread.keyTakeaways && (
-                              <ul className="list-disc list-inside text-xs text-[#fce8ba] line-clamp-2">
-                                {activeThread.keyTakeaways.map((item, idx) => (
-                                  <li key={idx}>{item}</li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-
-                          {/* Hộp yêu cầu Xem video 1 phút hoặc Quét QR MBBank */}
-                          <div className="p-3.5 rounded-xl bg-[#140b05]/95 border border-amber-500/60 space-y-2.5">
-                            <div className="text-xs font-black text-[#ffd875] flex items-center gap-1.5">
-                              <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-                              <span>PHẦN KHUYẾN NGHỊ CỦA AI & ĐÚC KẾT THỰC CHIẾN ĐANG KHÓA</span>
-                            </div>
-                            <p className="text-[11px] text-[#e6cb9c] leading-relaxed">
-                              Nội dung <strong>AI Khuyến nghị & Giải pháp khai thác thực chiến</strong> được phân tích chuyên sâu. Để xem ngay phân tích của AI cho chủ đề này, Quý Cao thủ vui lòng chọn:
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                              <a
-                                href="https://www.youtube.com/@choipoker?sub_confirmation=1"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => {
-                                  handleOpenUnlockCommentsModal();
-                                  setActiveYoutubeIdx(0);
-                                  setAdSecondsLeft(AD_COMMENTS_DURATION_SECONDS);
-                                  setAdPlaying(true);
-                                }}
-                                className="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
-                              >
-                                <span>▶️ Xem Video Giới Thiệu 1 Phút (Mở Khóa AI Miễn Phí)</span>
-                              </a>
-                              <button
-                                type="button"
-                                onClick={handleOpenUnlockCommentsModal}
-                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#ffd875] to-[#8b6b23] hover:from-[#ffe299] hover:to-[#a6822e] text-slate-950 font-black text-xs shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
-                              >
-                                <span>⚡ Quét Mã QR Mở Khóa (Từ 5k - Cốc Trà Đá)</span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* 3. HỘP TRÍCH DẪN NGUỒN BÀI VIẾT GỐC TỪ ĐÂU (HIỂN THỊ NGAY KÈM BÀI VIẾT CHÍNH CỦA TÁC GIẢ) */}
-                <div className="p-3.5 rounded-lg bg-[#1c1108] border border-[#4d3016] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#d1ba88] my-3">
-                  <div className="flex items-center space-x-2">
-                    <Globe2 className="w-4 h-4 text-[#e6b84d] shrink-0" />
-                    <span>
-                      <strong>Nguồn trích dẫn bài viết gốc:</strong> {activeThread.originalSource}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-[#8c6b45] italic shrink-0">Biên tập cho diễn đàn Học Poker</span>
-                </div>
+                )}
 
                 {/* THỬ THÁCH THỰC CHIẾN CLB - MỞ KHÓA CẤP ĐỘ SĂN MỒI */}
                 {activeThread.quizChallenge && (
@@ -2923,6 +2794,147 @@ export default function App() {
                   Vui lòng <button onClick={() => setShowAuthModal(true)} className="text-[#f5d77f] font-bold underline cursor-pointer">Đăng nhập</button> để gửi phản hồi vào bài viết này.
                 </div>
               )}
+            </div>
+
+            {/* ========================================================
+                CÁC PHẦN DƯỚI BÌNH LUẬN: BẢN DỊCH, AI KHUYẾN NGHỊ & NGUỒN TRÍCH DẪN
+            ======================================================== */}
+            <div className="border border-[#3d2712] rounded-xl overflow-hidden shadow-xl bg-[#140c06] p-5 space-y-5">
+              {/* 1. BẢN DỊCH & PHÂN TÍCH CHI TIẾT SANG NGÔN NGỮ BẢN ĐỊA (MIỄN PHÍ 100%) */}
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h3 className="text-sm font-bold text-[#f5d77f] uppercase tracking-wide flex items-center gap-1.5">
+                      <BarChart3 className="w-4 h-4 text-[#e6b84d]" />
+                      {activeThread.mainSection === 'tong-hop-dien-dan'
+                        ? 'Bản dịch nội dung bài viết & Phân tích sang ngôn ngữ bản địa:'
+                        : activeThread.mainSection === 'trao-doi-chinh'
+                        ? 'Nội dung phân tích sâu vấn đề & Hệ thống tư duy CLB:'
+                        : 'Nội dung bài giảng & giáo trình đào tạo:'}
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-600/60 text-emerald-300 text-[10px] font-bold">
+                      ✓ Miễn phí bản dịch bài viết chính ({SUPPORTED_LANGUAGES.find((l) => l.code === nativeLang)?.flag}{' '}
+                      {SUPPORTED_LANGUAGES.find((l) => l.code === nativeLang)?.label})
+                    </span>
+                  </div>
+                  <div className="bg-[#120a05] border border-[#382312] rounded-lg p-4 text-xs sm:text-sm text-[#f0dfc0] leading-relaxed whitespace-pre-wrap">
+                    {activeThread.detailedAnalysis}
+                  </div>
+                </div>
+
+                {/* 2. KHUYẾN NGHỊ AI & GIẢI PHÁP SOLVER & KHAI THÁC THỰC TẾ (Xem Video 1 Phút hoặc Quét VietQR từ 5k) */}
+                {(activeThread.gtoRecommendations || activeThread.keyTakeaways) && (
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5">
+                        <Cpu className="w-4 h-4" />
+                        {activeThread.mainSection === 'trao-doi-chinh'
+                          ? '🤖 AI Khuyến nghị: Giải pháp khắc phục & Nguyên tắc kỷ luật thực chiến:'
+                          : '🤖 AI Khuyến nghị: Giải pháp Solver & Khai thác thực tế:'}
+                      </h3>
+                      {areCommentsUnlockedForTopic(activeThread.id) ? (
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/70 text-emerald-300 text-[10px] font-bold">
+                          ✓ Đã mở khóa AI Khuyến nghị
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-950 border border-amber-500/70 text-amber-300 text-[10px] font-bold flex items-center gap-1">
+                          <Lock className="w-3 h-3" />
+                          Cần Subscribe YouTube @choipoker hoặc Quét QR
+                        </span>
+                      )}
+                    </div>
+
+                    {areCommentsUnlockedForTopic(activeThread.id) ? (
+                      <>
+                        {activeThread.gtoRecommendations && (
+                          <div className="bg-[#0c140e] border border-[#1b3d24] rounded-lg p-4 text-xs sm:text-sm text-[#c8eed0] leading-relaxed whitespace-pre-wrap">
+                            {activeThread.gtoRecommendations}
+                          </div>
+                        )}
+
+                        {activeThread.keyTakeaways && (
+                          <div className="p-3.5 rounded-lg bg-[#24160a] border border-[#573516] space-y-1.5">
+                            <h4 className="text-xs font-bold text-amber-300 uppercase flex items-center gap-1">
+                              <Award className="w-3.5 h-3.5 text-[#e6b84d]" />
+                              Đúc Kết Thực Chiến Chuẩn CLB:
+                            </h4>
+                            <ul className="list-disc list-inside space-y-1 text-xs text-[#fce8ba]">
+                              {activeThread.keyTakeaways.map((item, idx) => (
+                                <li key={idx} className="leading-relaxed">
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="rounded-xl bg-gradient-to-br from-[#0c1610] via-[#131e15] to-[#1a1007] border-2 border-amber-500/80 p-4 space-y-3 shadow-xl relative overflow-hidden">
+                        {/* Nội dung AI Khuyến nghị bị làm mờ */}
+                        <div className="space-y-2 blur-[5px] select-none pointer-events-none opacity-35">
+                          {activeThread.gtoRecommendations && (
+                            <div className="bg-[#0c140e] border border-[#1b3d24] rounded-lg p-3 text-xs text-[#c8eed0] line-clamp-3">
+                              {activeThread.gtoRecommendations}
+                            </div>
+                          )}
+                          {activeThread.keyTakeaways && (
+                            <ul className="list-disc list-inside text-xs text-[#fce8ba] line-clamp-2">
+                              {activeThread.keyTakeaways.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        {/* Hộp yêu cầu Xem video 1 phút hoặc Quét QR MBBank */}
+                        <div className="p-3.5 rounded-xl bg-[#140b05]/95 border border-amber-500/60 space-y-2.5">
+                          <div className="text-xs font-black text-[#ffd875] flex items-center gap-1.5">
+                            <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+                            <span>PHẦN KHUYẾN NGHỊ CỦA AI & ĐÚC KẾT THỰC CHIẾN ĐANG KHÓA</span>
+                          </div>
+                          <p className="text-[11px] text-[#e6cb9c] leading-relaxed">
+                            Nội dung <strong>AI Khuyến nghị & Giải pháp khai thác thực tế</strong> được phân tích chuyên sâu. Để xem ngay phân tích của AI cho chủ đề này, Quý Cao thủ vui lòng chọn:
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                            <a
+                              href="https://www.youtube.com/@choipoker?sub_confirmation=1"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => {
+                                handleOpenUnlockCommentsModal();
+                                setActiveYoutubeIdx(0);
+                                setAdSecondsLeft(AD_COMMENTS_DURATION_SECONDS);
+                                setAdPlaying(true);
+                              }}
+                              className="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
+                            >
+                              <span>▶️ Xem Video Giới Thiệu 1 Phút (Mở Khóa AI Miễn Phí)</span>
+                            </a>
+                            <button
+                              type="button"
+                              onClick={handleOpenUnlockCommentsModal}
+                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#ffd875] to-[#8b6b23] hover:from-[#ffe299] hover:to-[#a6822e] text-slate-950 font-black text-xs shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
+                            >
+                              <span>⚡ Quét Mã QR Mở Khóa (Từ 5k - Cốc Trà Đá)</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. HỘP TRÍCH DẪN NGUỒN BÀI VIẾT GỐC */}
+              <div className="p-3.5 rounded-lg bg-[#1c1108] border border-[#4d3016] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#d1ba88]">
+                <div className="flex items-center space-x-2">
+                  <Globe2 className="w-4 h-4 text-[#e6b84d] shrink-0" />
+                  <span>
+                    <strong>Nguồn trích dẫn bài viết gốc:</strong> {activeThread.originalSource}
+                  </span>
+                </div>
+                <span className="text-[11px] text-[#8c6b45] italic shrink-0">Biên tập cho diễn đàn Học Poker</span>
+              </div>
             </div>
           </div>
         ) : (
