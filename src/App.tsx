@@ -271,35 +271,7 @@ export default function App() {
         // fallback
       }
     }
-    return {
-      username: 'Tidu',
-      email: 'tidu@hocpoker.forumvi.com',
-      role: 'Giảng viên',
-      roleGroup: 'special',
-      specialRole: 'coach',
-      avatar: '/assets/forum/avatar_tidu.jpg',
-      wolfLevel: 4,
-      wolfTitle: 'Sói Đầu Đàn',
-      verification: {
-        onlineNickname: 'TiduPoker_VN',
-        onlineNetwork: 'GGNetwork (GGPoker)',
-        sharkscopeUrl: 'https://www.sharkscope.com/#Player-Statistics//networks/GGNetwork/players/TiduPoker_VN',
-        sharkscopeProfit: '+$42,850 (ROI 19.4%)',
-        sharkscopeVerified: true,
-        liveFullName: 'Nguyen Van Tidu',
-        hendonMobUrl: 'https://pokerdb.thehendonmob.com/player.php?a=r&n=Nguyen_Van_Tidu',
-        gpiRank: 'GPI #4,210 (Top 5 Vietnam)',
-        liveVerified: true,
-        trackerType: 'PT4',
-        sampleHands: '180,000 Hands',
-        databaseFileName: 'PT4_Database_Backup_2025_NL100_NL200.pt4',
-        databaseVerified: true,
-        cashGameLog: 'Nhật ký cày 600 giờ Cash Live $2/$5 & Online NL200 Zoom',
-        cashStake: '$2/$5 Live / NL200 Zoom',
-        cashWinrate: '+6.8 bb/100 (EV dương bền vững)',
-        cashVerified: true,
-      }
-    };
+    return null;
   });
 
   // Hồ Sơ Vận Động Viên & Xác Thực 4 Cổng Dữ Liệu
@@ -1233,7 +1205,10 @@ export default function App() {
       role: isTidu ? 'Giảng viên' : regRole,
       avatar: (isTidu || regRole === 'Giảng viên') ? '/assets/forum/avatar_tidu.jpg' : 'bg-emerald-600',
       wolfLevel: initialWolfLevel,
-      wolfTitle: titles[initialWolfLevel]
+      wolfTitle: titles[initialWolfLevel],
+      roleGroup: isTidu || regRole === 'Giảng viên' ? 'special' : 'athlete',
+      specialRole: isTidu || regRole === 'Giảng viên' ? 'coach' : undefined,
+      starLevel: isTidu || regRole === 'Giảng viên' ? undefined : 0
     };
 
     localStorage.setItem('hocpoker_nguoidung', JSON.stringify(user));
@@ -1683,6 +1658,110 @@ export default function App() {
           KHUNG DIỄN ĐÀN CHÍNH (#ipbwrapper - BỐ CỤC CHUẨN FORUMVI)
       ======================================================== */}
       <div className="max-w-[1080px] w-full mx-auto px-2 sm:px-4 py-3 flex-1 flex flex-col space-y-3">
+        {/* THANH THÀNH VIÊN TRÊN CÙNG (TOP MEMBER BAR) */}
+        <div className="bg-gradient-to-r from-[#170e08] via-[#24150b] to-[#170e08] border border-[#54361b] rounded-xl px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 shadow-xl text-xs">
+          {/* Trái: Lời chào & Nickname nổi bật */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {currentUser ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[#a68a56]">👋 Xin chào,</span>
+                <div
+                  onClick={() => setShowProfileModal(true)}
+                  className="flex items-center gap-1.5 cursor-pointer group"
+                  title="Nhấn để xem & chỉnh sửa Hồ Sơ Vận Động Viên"
+                >
+                  {currentUser.avatar && currentUser.avatar.startsWith('/') ? (
+                    <img
+                      src={currentUser.avatar}
+                      alt={currentUser.username}
+                      className="w-6 h-6 rounded-full object-cover border border-[#ffd875] group-hover:scale-110 transition-transform shadow"
+                    />
+                  ) : (
+                    <div className={`w-6 h-6 rounded-full ${currentUser.avatar || 'bg-emerald-600'} flex items-center justify-center text-[10px] text-black font-black shadow`}>
+                      {currentUser.username ? currentUser.username[0].toUpperCase() : 'U'}
+                    </div>
+                  )}
+                  <span className="font-black text-[#ffd875] text-sm group-hover:text-white transition-colors underline decoration-[#ffd875]/40 underline-offset-2">
+                    {currentUser.username}
+                  </span>
+                </div>
+                <div onClick={() => setShowProfileModal(true)} className="cursor-pointer" title="Cấp bậc VĐV / Ban điều hành - Nhấn để xem hồ sơ">
+                  {renderUserRankBadge(currentUser)}
+                </div>
+                <div onClick={() => setShowAuthModal(true)} className="cursor-pointer" title="Cấp độ Lò luyện Sói - Nhấn để đổi tài khoản">
+                  {renderWolfBadge(currentUser.wolfLevel, currentUser.wolfTitle)}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-[#d1ba88]">
+                <Users className="w-4 h-4 text-[#ffd875]" />
+                <span>Chào mừng <strong>Quý khách</strong> đến với Diễn đàn Chơi Poker!</span>
+                <span className="hidden md:inline text-[11px] text-[#8c6b45]">• Đăng nhập để thảo luận & tích lũy kinh nghiệm VĐV</span>
+              </div>
+            )}
+          </div>
+
+          {/* Phải: Các nút hành động */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {currentUser ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowProfileModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-[#29170a] hover:bg-[#3d2310] border border-[#784f1f] text-[#ffd875] font-bold text-xs flex items-center gap-1 cursor-pointer transition shadow"
+                  title="Mở Hồ Sơ VĐV & Xác Thực 4 Cổng Dữ Liệu"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Hồ Sơ & Xác Thực</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setShowAuthModal(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[#190e06] hover:bg-[#29170a] border border-[#4a3016] text-[#c4aa7d] hover:text-[#ffd875] text-xs font-semibold cursor-pointer transition"
+                  title="Chuyển đổi tài khoản khác"
+                >
+                  Đổi Nick
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="px-2.5 py-1 rounded-lg bg-rose-950/70 hover:bg-rose-900 border border-rose-800/70 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-1 cursor-pointer transition shadow"
+                  title="Đăng xuất khỏi diễn đàn"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Đăng Xuất</span>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setShowAuthModal(true);
+                  }}
+                  className="px-3.5 py-1 rounded-lg bg-[#241407] hover:bg-[#38200d] border border-[#ffd875]/80 text-[#ffd875] font-black text-xs transition-all cursor-pointer shadow flex items-center gap-1"
+                >
+                  <span>🔑 Đăng Nhập</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register');
+                    setShowAuthModal(true);
+                  }}
+                  className="px-3.5 py-1 rounded-lg bg-gradient-to-r from-[#ffd875] to-[#8b6b23] hover:from-[#ffe299] hover:to-[#a6822e] text-slate-950 font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-1"
+                >
+                  <span>✨ Đăng Ký</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* KHU_VỰC_HEADER_BANNER CHÍNH THỨC */}
         <div className="bg-[#080604] border border-[#4a3216] rounded-xl px-4 py-3.5 sm:px-6 sm:py-4 shadow-2xl relative overflow-hidden">
           {/* Dòng tiêu đề phía trên (Không có đuôi tên miền) */}
@@ -1979,16 +2058,29 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => {
-                  setAuthMode('login');
-                  setShowAuthModal(true);
-                }}
-                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#ffd875] to-[#8b6b23] hover:from-[#ffe299] hover:to-[#a6822e] text-slate-950 font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-1.5"
-              >
-                <Users className="w-3.5 h-3.5 text-black" />
-                <span>Đăng Ký / Đăng Nhập</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setShowAuthModal(true);
+                  }}
+                  className="px-3 py-1 rounded-lg bg-[#241407] hover:bg-[#38200d] border border-[#ffd875]/80 text-[#ffd875] font-black text-xs transition-all cursor-pointer shadow flex items-center gap-1"
+                >
+                  <Users className="w-3.5 h-3.5 text-[#ffd875]" />
+                  <span>Đăng Nhập</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register');
+                    setShowAuthModal(true);
+                  }}
+                  className="px-3.5 py-1 rounded-lg bg-gradient-to-r from-[#ffd875] to-[#8b6b23] hover:from-[#ffe299] hover:to-[#a6822e] text-slate-950 font-black text-xs transition-all cursor-pointer shadow-md flex items-center gap-1"
+                >
+                  <span>Đăng Ký</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -2791,7 +2883,27 @@ export default function App() {
                 </form>
               ) : (
                 <div className="p-3 bg-[#170e08] rounded-lg text-center text-xs text-[#a68a56]">
-                  Vui lòng <button onClick={() => setShowAuthModal(true)} className="text-[#f5d77f] font-bold underline cursor-pointer">Đăng nhập</button> để gửi phản hồi vào bài viết này.
+                  Vui lòng{' '}
+                  <button
+                    onClick={() => {
+                      setAuthMode('login');
+                      setShowAuthModal(true);
+                    }}
+                    className="text-[#f5d77f] font-bold underline cursor-pointer hover:text-white"
+                  >
+                    Đăng nhập
+                  </button>{' '}
+                  hoặc{' '}
+                  <button
+                    onClick={() => {
+                      setAuthMode('register');
+                      setShowAuthModal(true);
+                    }}
+                    className="text-[#f5d77f] font-bold underline cursor-pointer hover:text-white"
+                  >
+                    Đăng ký
+                  </button>{' '}
+                  để gửi phản hồi vào bài viết này.
                 </div>
               )}
             </div>
