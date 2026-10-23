@@ -522,9 +522,9 @@ export default function App() {
   const [verifyQrCountdown, setVerifyQrCountdown] = useState<number>(0);
   const [qrOrderCode] = useState<string>(() => 'CP' + Math.floor(1000 + Math.random() * 9000));
 
-  const VIETQR_BANK_ID = 'VCB';
-  const VIETQR_BANK_NAME = 'Vietcombank';
-  const VIETQR_ACCOUNT_NO = '9906998966';
+  const VIETQR_BANK_ID = 'MB';
+  const VIETQR_BANK_NAME = 'MBBank (Quân Đội)';
+  const VIETQR_ACCOUNT_NO = '0906998966';
   const VIETQR_ACCOUNT_NAME = 'NGUYEN TIEN DUNG';
 
   // Phiên mở khóa bản dịch các bình luận khác dưới 1 chủ đề (xem QC 30s -> xem được 30 phút cho đúng chủ đề đó)
@@ -771,13 +771,13 @@ export default function App() {
               : selectedSubPlan === 'year'
               ? `Forum (M) ${qrOrderCode}`
               : `forumM ${qrOrderCode}`;
-          alert(`⚠️ CHƯA NHẬN ĐƯỢC TIỀN VÀO VIETCOMBANK:\n\n${data.message}\n\n👉 Vui lòng mở ứng dụng ngân hàng, kiểm tra đã bấm "Xác nhận chuyển khoản" thành công với nội dung "${currentMemo}" chưa nhé!`);
+          alert(`⚠️ CHƯA NHẬN ĐƯỢC TIỀN VÀO MBBANK:\n\n${data.message}\n\n👉 Vui lòng mở ứng dụng ngân hàng, kiểm tra đã bấm "Xác nhận chuyển khoản" thành công với nội dung "${currentMemo}" chưa nhé!`);
         }
       }, 3500);
     } catch (e) {
       setTimeout(() => {
         setVerifyingQrPayment(false);
-        alert(`⚠️ Hệ thống chưa thể kết nối kiểm tra tài khoản Vietcombank lúc này. Quý khách vui lòng thử lại sau giây lát hoặc chụp biên lai giao dịch gửi Admin hỗ trợ ngay nhé!`);
+        alert(`⚠️ Hệ thống chưa thể kết nối kiểm tra tài khoản MBBank lúc này. Quý khách vui lòng thử lại sau giây lát hoặc chụp biên lai giao dịch gửi Admin hỗ trợ ngay nhé!`);
       }, 2000);
     }
   };
@@ -2404,7 +2404,7 @@ export default function App() {
                                 onClick={handleOpenUnlockCommentsModal}
                                 className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#ffd875] to-[#8b6b23] hover:from-[#ffe299] hover:to-[#a6822e] text-slate-950 font-black text-xs shadow-lg cursor-pointer transition-all flex items-center gap-1.5"
                               >
-                                <span>⚡ Quét Mã VietQR (Vietcombank) Mở Khóa VIP</span>
+                                <span>⚡ Quét Mã VietQR (MBBank) Mở Khóa VIP</span>
                               </button>
                             </div>
                           </div>
@@ -4127,7 +4127,7 @@ export default function App() {
                   <span>ĐẶC QUYỀN CỐ VẤN AI & KHUYẾN NGHỊ THỰC CHIẾN</span>
                 </div>
                 <p className="text-[11px] text-[#e6cb9c] leading-relaxed">
-                  Tính năng <strong>Cố Vấn Chiến Thuật AI</strong> dành riêng cho thành viên ủng hộ CLB. Quý Cao thủ vui lòng <strong>Subscribe kênh YouTube @choipoker</strong> (kèm xem video 30s) hoặc <strong>Quét mã VietQR (Vietcombank 9906998966)</strong> để mở khóa ngay nhé!
+                  Tính năng <strong>Cố Vấn Chiến Thuật AI</strong> dành riêng cho thành viên ủng hộ CLB. Quý Cao thủ vui lòng <strong>Subscribe kênh YouTube @choipoker</strong> (kèm xem video 30s) hoặc <strong>Quét mã VietQR (MBBank 0906998966)</strong> để mở khóa ngay nhé!
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 pt-1">
                   <a
@@ -5404,7 +5404,7 @@ export default function App() {
                     <div className="p-2.5 rounded-lg bg-[#160c05] border border-[#382312] space-y-1 text-[11px]">
                       <div className="flex justify-between gap-2">
                         <span className="text-[#9e8052]">Ngân hàng:</span>
-                        <span className="font-bold text-[#f5dfb0]">{VIETQR_BANK_NAME} (VCB)</span>
+                        <span className="font-bold text-[#f5dfb0]">{VIETQR_BANK_NAME}</span>
                       </div>
                       <div className="flex justify-between gap-2">
                         <span className="text-[#9e8052]">Số tài khoản:</span>

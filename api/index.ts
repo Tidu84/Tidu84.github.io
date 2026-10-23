@@ -2456,7 +2456,8 @@ app.get('/api/forum/admin-report', async (_req, res) => {
 });
 
 // ========================================================
-// HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ VIETCOMBANK & DUYỆT HẠN MỨC TỰ ĐỘNG
+// HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ SEPAY (MBBANK) & DUYỆT HẠN MỨC TỰ ĐỘNG
+// Tài khoản MBBank: 0906998966 - NGUYEN TIEN DUNG
 // Cú pháp chuyển khoản: 
 // - Gói Tháng (45k): "forumM [Mã Đơn]" (VD: forumM CP8392)
 // - Gói 1 Năm (450k): "Forum (M) [Mã Đơn]" (VD: Forum (M) CP8392)
@@ -2475,14 +2476,14 @@ interface PaidTransaction {
 
 const PAID_TRANSACTIONS: Record<string, PaidTransaction> = {};
 
-// Webhook tiếp nhận biến động số dư từ Vietcombank (SePay, Casso hoặc App chuyển tiếp thông báo VCB)
-app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
+// Webhook xử lý biến động số dư từ SePay (hỗ trợ cả MBBank, Vietcombank, Casso...)
+const handlePaymentWebhook = async (req: any, res: any) => {
   try {
     const body = req.body || {};
-    // Chuẩn hóa dữ liệu từ các cổng VCB Webhook (SePay, Casso, Banking notification)
+    // Chuẩn hóa dữ liệu từ các cổng SePay Webhook / Open Banking
     const rawAmount = Number(body.amount || body.transferAmount || body.creditAmount || 0);
     const content = String(body.content || body.description || body.subAccount || body.orderCode || '').toUpperCase();
-    const sender = String(body.senderName || body.correspName || body.accountNumber || 'Vietcombank User');
+    const sender = String(body.senderName || body.correspName || body.accountNumber || 'MBBank User');
 
     if (rawAmount < 45000) {
       return res.status(400).json({
@@ -2535,8 +2536,8 @@ app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'VCB_PAYMENT_APPROVED',
-        title: `💰 Vietcombank Tự Động Duyệt Gói ${planLabel} (${rawAmount.toLocaleString('vi-VN')}đ)`,
+        type: 'MBBANK_PAYMENT_APPROVED',
+        title: `💰 MBBank (SePay) Tự Động Duyệt Gói ${planLabel} (${rawAmount.toLocaleString('vi-VN')}đ)`,
         ...paidRecord
       })
     }).catch(() => {});
@@ -2547,12 +2548,15 @@ app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
       paidRecord
     });
   } catch (err: any) {
-    console.error('Lỗi VCB Webhook:', err);
-    res.status(500).json({ error: err.message || 'Lỗi xử lý Webhook VCB' });
+    console.error('Lỗi SePay Webhook:', err);
+    res.status(500).json({ error: err.message || 'Lỗi xử lý Webhook SePay' });
   }
-});
+};
 
-// Endpoint kiểm tra giao dịch thực tế từ tài khoản Vietcombank (chặn 100% người bấm khống)
+app.post('/api/forum/payment/sepay-webhook', handlePaymentWebhook);
+app.post('/api/forum/payment/vcb-webhook', handlePaymentWebhook);
+
+// Endpoint kiểm tra giao dịch thực tế từ tài khoản MBBank qua SePay (chặn 100% người bấm khống)
 app.get('/api/forum/payment/check-status', (req, res) => {
   const code = String(req.query.code || req.query.orderCode || '').trim().toUpperCase();
   if (!code) {
@@ -2568,7 +2572,7 @@ app.get('/api/forum/payment/check-status', (req, res) => {
         : (found.plan === 'year' ? '1 Năm (365 ngày)' : '1 Tháng (30 ngày)');
     return res.json({
       paid: true,
-      message: `Đã xác thực giao dịch thành công từ Vietcombank! Tự động duyệt gói ${planDurationLabel}.`,
+      message: `Đã xác thực giao dịch thành công từ MBBank (SePay)! Tự động duyệt gói ${planDurationLabel}.`,
       plan: found.plan,
       activationCode: found.activationCode,
       amount: found.amount,
@@ -2578,7 +2582,7 @@ app.get('/api/forum/payment/check-status', (req, res) => {
 
   return res.json({
     paid: false,
-    message: `Hệ thống kiểm tra tài khoản Vietcombank 9906998966 chưa nhận được số tiền với nội dung chứa mã "${code}". Quý khách vui lòng hoàn tất chuyển khoản trong ứng dụng ngân hàng rồi kiểm tra lại nhé!`
+    message: `Hệ thống kiểm tra tài khoản MBBank 0906998966 chưa nhận được số tiền với nội dung chứa mã "${code}". Quý khách vui lòng hoàn tất chuyển khoản trong ứng dụng ngân hàng rồi kiểm tra lại nhé!`
   });
 });
 
