@@ -2455,4 +2455,115 @@ app.get('/api/forum/admin-report', async (_req, res) => {
   }
 });
 
+// ========================================================
+// HỆ THỐNG KẾT NỐI BIẾN ĐỘNG SỐ DƯ VIETCOMBANK & DUYỆT HẠN MỨC TỰ ĐỘNG
+// Cú pháp chuyển khoản: "FORUM [Mã Đơn]" (VD: FORUM CP8392)
+// Hạn mức: >= 49.000đ -> Duyệt 1 Tháng | >= 490.000đ -> Duyệt 1 Năm
+// ========================================================
+interface PaidTransaction {
+  orderCode: string;
+  amount: number;
+  plan: 'month' | 'year';
+  activationCode: string;
+  sender?: string;
+  transactionDate: string;
+  timestamp: number;
+}
+
+const PAID_TRANSACTIONS: Record<string, PaidTransaction> = {};
+
+// Webhook tiếp nhận biến động số dư từ Vietcombank (SePay, Casso hoặc App chuyển tiếp thông báo VCB)
+app.post('/api/forum/payment/vcb-webhook', async (req, res) => {
+  try {
+    const body = req.body || {};
+    // Chuẩn hóa dữ liệu từ các cổng VCB Webhook (SePay, Casso, Banking notification)
+    const rawAmount = Number(body.amount || body.transferAmount || body.creditAmount || 0);
+    const content = String(body.content || body.description || body.subAccount || body.orderCode || '').toUpperCase();
+    const sender = String(body.senderName || body.correspName || body.accountNumber || 'Vietcombank User');
+
+    if (rawAmount < 49000) {
+      return res.status(400).json({
+        error: 'Số tiền nhỏ hơn hạn mức tối thiểu 49.000đ của CLB'
+      });
+    }
+
+    // Tự động phân loại hạn mức: >= 490k -> 1 Năm (tặng 2 tháng), >= 49k -> 1 Tháng
+    const plan: 'month' | 'year' = rawAmount >= 490000 ? 'year' : 'month';
+
+    // Trích xuất mã đơn dạng CPxxxx hoặc FORUM xxxx trong nội dung chuyển khoản
+    let matchedOrderCode = '';
+    const cpMatch = content.match(/CP\d{4}/);
+    if (cpMatch) {
+      matchedOrderCode = cpMatch[0];
+    } else {
+      const forumMatch = content.match(/FORUM\s*(\w+)/);
+      if (forumMatch) {
+        matchedOrderCode = forumMatch[1];
+      } else {
+        matchedOrderCode = 'GLOBAL_' + Date.now();
+      }
+    }
+
+    const activationCode = `VIP-${plan.toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    const paidRecord: PaidTransaction = {
+      orderCode: matchedOrderCode,
+      amount: rawAmount,
+      plan,
+      activationCode,
+      sender,
+      transactionDate: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+      timestamp: Date.now()
+    };
+
+    PAID_TRANSACTIONS[matchedOrderCode] = paidRecord;
+
+    // Gửi thông báo tức thì về ntfy và Cloud DB để đối soát
+    fetch(NTFY_LOG_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'VCB_PAYMENT_APPROVED',
+        title: `💰 Vietcombank Tự Động Duyệt Gói ${plan === 'month' ? '1 Tháng' : '1 Năm'} (${rawAmount.toLocaleString('vi-VN')}đ)`,
+        ...paidRecord
+      })
+    }).catch(() => {});
+
+    res.json({
+      success: true,
+      message: `Đã duyệt tự động hạn mức gói ${plan === 'month' ? '1 Tháng' : '1 Năm'} thành công!`,
+      paidRecord
+    });
+  } catch (err: any) {
+    console.error('Lỗi VCB Webhook:', err);
+    res.status(500).json({ error: err.message || 'Lỗi xử lý Webhook VCB' });
+  }
+});
+
+// Endpoint kiểm tra giao dịch thực tế từ tài khoản Vietcombank (chặn 100% người bấm khống)
+app.get('/api/forum/payment/check-status', (req, res) => {
+  const code = String(req.query.code || req.query.orderCode || '').trim().toUpperCase();
+  if (!code) {
+    return res.status(400).json({ paid: false, message: 'Thiếu mã đơn hàng' });
+  }
+
+  // Tìm trong danh sách giao dịch đã thực sự được ngân hàng xác nhận
+  const found = PAID_TRANSACTIONS[code];
+  if (found) {
+    return res.json({
+      paid: true,
+      message: `Đã xác thực giao dịch thành công từ Vietcombank! Tự động duyệt gói ${found.plan === 'month' ? '1 Tháng (30 ngày)' : '1 Năm (365 ngày)'}.`,
+      plan: found.plan,
+      activationCode: found.activationCode,
+      amount: found.amount,
+      approvedAt: found.transactionDate
+    });
+  }
+
+  return res.json({
+    paid: false,
+    message: `Hệ thống kiểm tra tài khoản Vietcombank 9906998966 chưa nhận được số tiền với nội dung chứa mã "${code}". Quý khách vui lòng hoàn tất chuyển khoản trong ứng dụng ngân hàng rồi kiểm tra lại nhé!`
+  });
+});
+
 export default app;

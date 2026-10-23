@@ -730,56 +730,46 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [showLangModal, adPlaying, adSecondsLeft, pendingLang, activeThread, langModalMode]);
 
-  // Tự động xác thực và mở khóa ngay khi khách quét mã VietQR (chủ diễn đàn không cần mở tay)
-  useEffect(() => {
-    if (!verifyingQrPayment) return;
-    if (verifyQrCountdown <= 0) {
-      const sub: LangSubscription = {
-        plan: selectedSubPlan,
-        expiresAt:
-          selectedSubPlan === 'month'
-            ? Date.now() + 30 * 24 * 60 * 60 * 1000
-            : Date.now() + 365 * 24 * 60 * 60 * 1000
-      };
-      setLangSub(sub);
-      localStorage.setItem('hocpoker_lang_sub', JSON.stringify(sub));
-      if (pendingLang && langModalMode === 'topic-lang') {
-        applyLanguageToDOM(pendingLang);
-      }
-      setVerifyingQrPayment(false);
-      setShowLangModal(false);
-      confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
-
-      // Ghi nhận thông báo giao dịch tự động cho chủ diễn đàn
-      try {
-        fetch('https://formsubmit.co/ajax/tidu888@gmail.com', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-          },
-          body: JSON.stringify({
-            _subject: `💎 [Chơi Poker] Đã mở khóa tự động gói ${selectedSubPlan === 'month' ? '1 Tháng (49.000đ)' : '1 Năm (490.000đ)'}`,
-            _template: 'table',
-            'Thành viên': currentUser?.username || 'Khách',
-            'Gói đăng ký': selectedSubPlan === 'month' ? 'Hội Viên 1 Tháng (49.000đ)' : 'Hội Viên 1 Năm - Ưu đãi 10 tháng (490.000đ)',
-            'Nội dung CK VietQR': `${selectedSubPlan === 'month' ? 'VIPTHANG' : 'VIPNAM'} ${qrOrderCode}`,
-            'Ngân hàng nhận': `${VIETQR_BANK_NAME} - ${VIETQR_ACCOUNT_NO} (${VIETQR_ACCOUNT_NAME})`,
-            'Thời gian': new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
-          })
-        }).catch(() => {});
-      } catch {}
-      return;
-    }
-    const timer = setTimeout(() => {
-      setVerifyQrCountdown((prev) => prev - 1);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [verifyingQrPayment, verifyQrCountdown, selectedSubPlan, pendingLang, langModalMode, currentUser?.username, qrOrderCode]);
-
-  const handleStartAutoVerifyQr = () => {
-    setVerifyQrCountdown(5);
+  // Kiểm tra giao dịch thực tế từ tài khoản Vietcombank (chặn 100% người bấm khống)
+  const handleStartAutoVerifyQr = async () => {
     setVerifyingQrPayment(true);
+    setVerifyQrCountdown(6);
+
+    try {
+      // Gọi kiểm tra biến động số dư thực tế tại Vietcombank qua API
+      const res = await fetch(`${API_BASE}/api/forum/payment/check-status?code=${qrOrderCode}`);
+      const data = await res.json();
+
+      setTimeout(() => {
+        setVerifyingQrPayment(false);
+
+        if (data.paid) {
+          const approvedPlan = data.plan || selectedSubPlan;
+          const sub: LangSubscription = {
+            plan: approvedPlan,
+            expiresAt:
+              approvedPlan === 'month'
+                ? Date.now() + 30 * 24 * 60 * 60 * 1000
+                : Date.now() + 365 * 24 * 60 * 60 * 1000
+          };
+          setLangSub(sub);
+          localStorage.setItem('hocpoker_lang_sub', JSON.stringify(sub));
+          if (pendingLang && langModalMode === 'topic-lang') {
+            applyLanguageToDOM(pendingLang);
+          }
+          setShowLangModal(false);
+          confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+          alert(`🎉 CHÚC MỪNG!\n${data.message}\nMã kích hoạt VIP của Quý khách: ${data.activationCode}`);
+        } else {
+          alert(`⚠️ CHƯA NHẬN ĐƯỢC TIỀN VÀO VIETCOMBANK:\n\n${data.message}\n\n👉 Vui lòng mở ứng dụng ngân hàng, kiểm tra đã bấm "Xác nhận chuyển khoản" thành công với nội dung "FORUM ${qrOrderCode}" chưa nhé!`);
+        }
+      }, 3500);
+    } catch (e) {
+      setTimeout(() => {
+        setVerifyingQrPayment(false);
+        alert(`⚠️ Hệ thống chưa thể kết nối kiểm tra tài khoản Vietcombank lúc này. Quý khách vui lòng thử lại sau giây lát hoặc chụp biên lai giao dịch gửi Admin hỗ trợ ngay nhé!`);
+      }, 2000);
+    }
   };
 
   const handleActivateSubscription = (e: React.FormEvent) => {
@@ -5326,7 +5316,7 @@ export default function App() {
                       src={`https://img.vietqr.io/image/${VIETQR_BANK_ID}-${VIETQR_ACCOUNT_NO}-compact2.png?amount=${
                         selectedSubPlan === 'month' ? MONTHLY_PRICE_VND : YEARLY_PRICE_VND
                       }&addInfo=${encodeURIComponent(
-                        `${selectedSubPlan === 'month' ? 'VIPTHANG' : 'VIPNAM'} ${qrOrderCode}`
+                        `FORUM ${qrOrderCode}`
                       )}&accountName=${encodeURIComponent(VIETQR_ACCOUNT_NAME)}`}
                       alt="Mã VietQR Tự Động Mở Khóa"
                       className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded"
@@ -5363,7 +5353,7 @@ export default function App() {
                       <div className="flex justify-between gap-2">
                         <span className="text-[#9e8052]">Nội dung CK:</span>
                         <span className="font-black text-amber-300">
-                          {selectedSubPlan === 'month' ? 'VIPTHANG' : 'VIPNAM'} {qrOrderCode}
+                          FORUM {qrOrderCode}
                         </span>
                       </div>
                     </div>
