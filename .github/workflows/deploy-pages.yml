@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["main", "master"]
+  schedule:
+    # 06:00 AM giờ Việt Nam (UTC+7) = 23:00 UTC hôm trước (Cập nhật bản tin sáng sớm cho anh em ăn sáng đọc)
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 permissions:

@@ -893,8 +893,19 @@ export default function App() {
     }
   };
 
-  // Đồng bộ định kỳ: 6 tiếng 1 lần (chuẩn diễn đàn nghiên cứu, không chạy đua như tin tức)
+  // 1. Đồng bộ định kỳ: 6 tiếng 1 lần (chuẩn diễn đàn nghiên cứu, không chạy đua như tin tức)
   const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+
+  // 2. Tính toán mili-giây tới mốc 06:00 AM tiếp theo (Bản tin sáng sớm cho anh em ăn sáng đọc)
+  const calculateMsUntilNext6AM = () => {
+    const now = new Date();
+    const next6AM = new Date(now);
+    next6AM.setHours(6, 0, 0, 0);
+    if (now.getTime() >= next6AM.getTime()) {
+      next6AM.setDate(next6AM.getDate() + 1);
+    }
+    return next6AM.getTime() - now.getTime();
+  };
 
   const fetchForumDataSilently = async () => {
     // Nếu người dùng đã vào diễn đàn con / đang đọc bài viết:
@@ -941,13 +952,34 @@ export default function App() {
   }, [selectedSection, selectedCategory]);
 
   useEffect(() => {
-    // Chỉ đồng bộ ngầm định kỳ 6 tiếng 1 lần và chỉ khi đang ở ngoài danh sách diễn đàn
-    const timer = setInterval(() => {
+    // A. Chỉ đồng bộ ngầm định kỳ 6 tiếng 1 lần và chỉ khi đang ở ngoài danh sách diễn đàn
+    const intervalTimer = setInterval(() => {
       if (activeThreadIdRef.current === null) {
         fetchForumDataSilently();
       }
     }, SIX_HOURS_MS);
-    return () => clearInterval(timer);
+
+    // B. Lịch quét cố định 06:00 sáng mỗi ngày cho anh em ăn sáng đọc
+    let dailyIntervalTimer: NodeJS.Timeout | null = null;
+    const msTo6AM = calculateMsUntilNext6AM();
+    const morningTimeout = setTimeout(() => {
+      if (activeThreadIdRef.current === null) {
+        console.log('🌅 [06:00 AM] Tự động rà soát diễn đàn sáng sớm cho anh em ăn sáng đọc...');
+        fetchForumDataSilently();
+      }
+      dailyIntervalTimer = setInterval(() => {
+        if (activeThreadIdRef.current === null) {
+          console.log('🌅 [06:00 AM Hàng Ngày] Tự động rà soát diễn đàn sáng sớm...');
+          fetchForumDataSilently();
+        }
+      }, 24 * 60 * 60 * 1000);
+    }, msTo6AM);
+
+    return () => {
+      clearInterval(intervalTimer);
+      clearTimeout(morningTimeout);
+      if (dailyIntervalTimer) clearInterval(dailyIntervalTimer);
+    };
   }, [selectedSection, selectedCategory, searchQuery]);
 
   // Lắng nghe URL Hash (#thread-{id}) để mở trực tiếp ván bài / bài viết khi chia sẻ link hoặc bấm Back
@@ -2096,6 +2128,10 @@ export default function App() {
               <p>...Nếu bạn chỉ muốn biết thế nào là Poker, hãy hỏi GOOGLE....</p>
               <p>...Nếu bạn muốn học chơi, hãy đăng ký thành viên...</p>
               <p className="text-[#ffd875] font-bold">...Nếu bạn muốn kiếm tiền từ Poker, hãy liên hệ với chúng tôi...</p>
+              <p className="text-emerald-400 text-[11px] pt-1 flex items-center gap-1 font-semibold">
+                <span>☕</span>
+                <span><strong>Bản Tin Sáng 06:00:</strong> Tự động rà soát diễn đàn quốc tế lúc 06:00 sáng mỗi ngày cho anh em ăn sáng đọc & đồng bộ ngầm định kỳ 6 tiếng/lần.</span>
+              </p>
             </div>
           </div>
         </div>
