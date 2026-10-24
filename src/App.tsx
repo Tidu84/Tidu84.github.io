@@ -2128,10 +2128,6 @@ export default function App() {
               <p>...Nếu bạn chỉ muốn biết thế nào là Poker, hãy hỏi GOOGLE....</p>
               <p>...Nếu bạn muốn học chơi, hãy đăng ký thành viên...</p>
               <p className="text-[#ffd875] font-bold">...Nếu bạn muốn kiếm tiền từ Poker, hãy liên hệ với chúng tôi...</p>
-              <p className="text-emerald-400 text-[11px] pt-1 flex items-center gap-1 font-semibold">
-                <span>☕</span>
-                <span><strong>Bản Tin Sáng 06:00:</strong> Tự động rà soát diễn đàn quốc tế lúc 06:00 sáng mỗi ngày cho anh em ăn sáng đọc & đồng bộ ngầm định kỳ 6 tiếng/lần.</span>
-              </p>
             </div>
           </div>
         </div>
